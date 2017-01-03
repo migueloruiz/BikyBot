@@ -56,7 +56,7 @@ gulp.task('bs-reload', function () {
 
 // Lint JS task
 gulp.task('jslint', function() {
-  return gulp.src('app/**/*.js')
+  return gulp.src(['app/**/*.js','!fb_expale.js'])
     .pipe(plumber({ errorHandler: onError }))
     .pipe(standard())
     .pipe(standard.reporter('default', {
@@ -82,7 +82,7 @@ gulp.task('jslint', function() {
 // });
 
 gulp.task('default', ['jslint', 'browser-sync'], function () {
-  gulp.watch('app/**/*.js', ['jslint', browserSync.reload]);
+  gulp.watch(['app/**/*.js','!fb_expale.js'], ['jslint', browserSync.reload]);
 	// gulp.watch('app/**/*.pug', [browserSync.reload]);
   // gulp.watch('public/**/*.js',   ['js', browserSync.reload]);
   // gulp.watch('public/**/*.css',  ['css']);

@@ -3,6 +3,8 @@
 var express = require('express')
 var path = require('path')
 var http = require('http')
+var request = require('request');
+var async = require('async')
 
 // Midlleware
 // ==========================
@@ -11,6 +13,16 @@ var compression = require('compression')
 var logger = require('morgan')
 var cookieParser = require('cookie-parser')
 var bodyParser = require('body-parser')
+
+// Databease
+// ==========================
+var mongoose = require('mongoose')
+mongoose.Promise = require('bluebird')
+
+// Models
+// ==========================
+var bikeStationModel = require(path.join(__dirname, '/models/bikeStation'))()
+var BikeStation = mongoose.model('BikeStation')
 
 // Routes
 // ==========================
@@ -22,6 +34,67 @@ var webhook = require(path.join(__dirname, '/routes/webhook/webhook'))
 // ==========================
 var dotenv = require('dotenv')
 dotenv.load()
+
+const DB_USER = process.env.DB_USER
+const DB_PASSWORD = process.env.DB_PASSWORD
+const DB_URL = process.env.DB_URL
+
+const ECO_ID = process.env.ECO_CLIENT_ID
+const ECO_SECRET = process.env.ECO_CLIENT_SECRET
+
+// Databease Setup
+// ==========================
+async.auto({
+    get_ecobici_access: (cb) =>{
+			var url = `https://pubsbapi.smartbike.com/oauth/v2/token?client_id=${ECO_ID}&client_secret=${ECO_SECRET}&grant_type=client_credentials`
+			request(url, function (err, response, body) {
+				if (err) throw err
+				if (!err && response.statusCode == 200) {
+					var data = JSON.parse(body);
+					cb(null, data.access_token);
+				}
+			})
+    },
+		get_bikeStations: ['get_ecobici_access', (results, cb) => {
+
+			var url = `https://pubsbapi.smartbike.com/api/v1/stations.json?access_token=${results.get_ecobici_access}`
+			request(url, function (err, response, body) {
+				if (err) throw err
+				if (!err && response.statusCode == 200) {
+					var data = JSON.parse(body);
+					cb(null, data.stations);
+				}
+			})
+		}],
+		set_db: ['get_ecobici_access','get_bikeStations', (results, cb) => {
+			mongoose.connect(`mongodb://${DB_USER}:${DB_PASSWORD}@${DB_URL}`, function (err) {
+			  if (err) {
+					console.log('Error DB')
+					throw err
+				}
+
+			  BikeStation.remove(function() {
+			    async.each(results.get_bikeStations, function(item, cb) {
+						let station = {
+							ecobici_id: item.id,
+							name: item.name,
+							address: item.address,
+							type: item.stationType,
+							loc: [item.location.lon, item.location.lat]
+						}
+			      BikeStation.create(station, cb)
+			    }, function(err) {
+			      if (err) throw err
+			    })
+			  })
+			})
+
+		}]
+}, function(err, results) {
+		if(err)
+			throw err
+    console.log('Server Init');
+});
 
 // Server Setup
 // ==========================
@@ -44,7 +117,7 @@ if (!(APP_SECRET && VALIDATION_TOKEN && PAGE_ACCESS_TOKEN && SERVER_URL)) {
   app.set('SERVER_URL', SERVER_URL)
 }
 
-var port = process.env.PORT || 3000
+var port = process.env.PORT || 4000
 app.set('port', port)
 
 app.set('views', path.join(__dirname, 'views'))
@@ -54,7 +127,7 @@ app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')))
 app.use(compression())
 app.use(logger('dev'))
 app.use(bodyParser.json())
-// app.use(bodyParser.json({ verify: verifyRequestSignature }));
+// app.use(bodyParser.json({ verify: verifyRequestSignature }))
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
