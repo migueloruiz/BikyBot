@@ -75,7 +75,7 @@ async.auto({
 
 			  BikeStation.remove(function() {
 			    async.each(results.get_bikeStations, function(item, cb) {
-						let station = {
+						var station = {
 							ecobici_id: item.id,
 							name: item.name,
 							address: item.address,

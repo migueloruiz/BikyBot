@@ -78,6 +78,7 @@ router.get('/', function (req, res) {
 router.post('/', function (req, res) {
 	console.log('=======================================================================')
   var data = req.body;
+  console.log('Body',JSON.stringify(req.body))
 
   // Make sure this is a page subscription
   if (data.object == 'page') {
@@ -136,6 +137,7 @@ function receivedMessage(event) {
     return;
   }
 
+  console.log('messageText:',messageText)
   if (messageText) {
 
     // If we receive a text message, check to see if it matches any special
@@ -147,6 +149,7 @@ function receivedMessage(event) {
         break;
 
       case 'generic':
+      console.log('messageText2:',messageText)
         sendGenericMessage(senderID);
         break;
 
@@ -246,6 +249,7 @@ function sendButtonMessage(recipientId) {
 }
 
 function sendGenericMessage(recipientId) {
+  console.log('messageText3:')
   var messageData = {
     recipient: {
       id: recipientId
@@ -255,35 +259,60 @@ function sendGenericMessage(recipientId) {
         type: "template",
         payload: {
           template_type: "generic",
-          elements: [{
-            title: "rift",
-            subtitle: "Next-generation virtual reality",
-            item_url: "https://www.oculus.com/en-us/rift/",
-            image_url: SERVER_URL + "/assets/rift.png",
-            buttons: [{
-              type: "web_url",
-              url: "https://www.oculus.com/en-us/rift/",
-              title: "Open Web URL"
-            }, {
-              type: "postback",
-              title: "Call Postback",
-              payload: "Payload for first bubble",
-            }],
-          }, {
-            title: "touch",
-            subtitle: "Your Hands, Now in VR",
-            item_url: "https://www.oculus.com/en-us/touch/",
-            image_url: SERVER_URL + "/assets/touch.png",
-            buttons: [{
-              type: "web_url",
-              url: "https://www.oculus.com/en-us/touch/",
-              title: "Open Web URL"
-            }, {
-              type: "postback",
-              title: "Call Postback",
-              payload: "Payload for second bubble",
-            }]
-          }]
+          elements: [
+            {
+              title: 'Marina nacional e isasaga colonia orera',
+              subtitle: 'A 0.8 km',
+              image_url: "https:\/\/maps.googleapis.com\/maps\/api\/staticmap?size=764x400&center=19.4406926,-99.2047001&zoom=19&markers=19.4406926,-99.2047001",
+              item_url: 'https:\/\/maps.apple.com\/maps?q=19.4406926,-99.2047001&z=16',
+              buttons: [
+                {
+                  type: "web_url",
+                  url: 'https:\/\/maps.apple.com\/maps?q=19.4406926,-99.2047001&z=16',
+                  title: "Ver mapa"
+                }
+              ]
+            },
+            {
+              title: 'Marina nacional e isasaga colonia orera',
+              subtitle: 'A 0.8 km',
+              image_url: "https:\/\/maps.googleapis.com\/maps\/api\/staticmap?size=764x400&center=19.4406926,-99.2047001&zoom=19&markers=19.4406926,-99.2047001",
+              item_url: 'https:\/\/maps.apple.com\/maps?q=19.4406926,-99.2047001&z=16',
+              buttons: [
+                {
+                  type: "web_url",
+                  url: 'https:\/\/maps.apple.com\/maps?q=19.4406926,-99.2047001&z=16',
+                  title: "Ver mapa"
+                }
+              ]
+            },
+            {
+              title: 'Marina nacional e isasaga colonia orera',
+              subtitle: 'A 0.8 km',
+              image_url: "https:\/\/maps.googleapis.com\/maps\/api\/staticmap?size=764x400&center=19.4406926,-99.2047001&zoom=19&markers=19.4406926,-99.2047001",
+              item_url: 'https:\/\/maps.apple.com\/maps?q=19.4406926,-99.2047001&z=16',
+              buttons: [
+                {
+                  type: "web_url",
+                  url: 'https:\/\/maps.apple.com\/maps?q=19.4406926,-99.2047001&z=16',
+                  title: "Ver mapa"
+                }
+              ]
+            },
+            {
+              title: 'Marina nacional e isasaga colonia orera',
+              subtitle: 'A 0.8 km',
+              image_url: "https:\/\/maps.googleapis.com\/maps\/api\/staticmap?size=764x400&center=19.4406926,-99.2047001&zoom=19&markers=19.4406926,-99.2047001",
+              item_url: 'https:\/\/maps.apple.com\/maps?q=19.4406926,-99.2047001&z=16',
+              buttons: [
+                {
+                  type: "web_url",
+                  url: 'https:\/\/maps.apple.com\/maps?q=19.4406926,-99.2047001&z=16',
+                  title: "Ver mapa"
+                }
+              ]
+            }
+          ]
         }
       }
     }
@@ -362,77 +391,53 @@ function sendList(recipientId){
 		        type: 'template',
 		        payload: {
 		            template_type: 'list',
+                top_element_style: 'large',
 		            elements: [
 		                {
-		                    title: 'Classic Black T-Shirt',
-		                    image_url: 'http://lorempixel.com/g/400/200/city/',
-		                    subtitle: '100% Cotton, 200% Comfortable',
-		                    default_action: {
-		                        type: 'web_url',
-		                        url: 'https://google.com',
-		                        messenger_extensions: true,
-		                        webview_height_ratio: 'tall',
-		                        fallback_url: 'https://google.com'
-		                    },
-		                    buttons: [
-		                        {
-		                            title: 'Shop Now',
-		                            type: 'web_url',
-		                            url: 'https://google.comshop?item=102',
-		                            messenger_extensions: true,
-		                            webview_height_ratio: 'tall',
-		                            fallback_url: 'https://google.com'
-		                        }
-		                    ]
+		                    title: 'Estaciones más cercanas',
+		                    image_url: process.env.SERVER_URL + "/assets/images/fondo.jpg",
+		                    subtitle: 'En estas estaciones hay lugare disponibles'
 		                },
 										{
-		                    title: 'Classic Black T-Shirt',
-		                    image_url: 'http://lorempixel.com/g/400/200/city/',
-		                    subtitle: '100% Cotton, 200% Comfortable',
+		                    title: 'Marina nacional e isasaga colonia orera',
+		                    image_url: "https:\/\/maps.googleapis.com\/maps\/api\/staticmap?size=764x400&center=19.4406926,-99.2047001&zoom=18&markers=19.4406926,-99.2047001",
+		                    subtitle: 'A 0.8 km',
 		                    default_action: {
 		                        type: 'web_url',
-		                        url: 'https://google.com',
+		                        url: 'https:\/\/maps.apple.com\/maps?q=19.4406926,-99.2047001&z=16',
 		                        messenger_extensions: true,
 		                        webview_height_ratio: 'tall',
-		                        fallback_url: 'https://google.com'
-		                    },
-		                    buttons: [
-		                        {
-		                            title: 'Shop Now',
-		                            type: 'web_url',
-		                            url: 'https://google.comshop?item=102',
-		                            messenger_extensions: true,
-		                            webview_height_ratio: 'tall',
-		                            fallback_url: 'https://google.com'
-		                        }
-		                    ]
+		                        fallback_url: 'https:\/\/maps.apple.com\/maps?q=19.4406926,-99.2047001&z=16'
+		                    }
 		                },
 										{
-		                    title: 'Classic Black T-Shirt',
-		                    image_url: 'http://lorempixel.com/g/400/200/city/',
-		                    subtitle: '100% Cotton, 200% Comfortable',
+		                    title: 'Marina nacional e isasaga colonia orera',
+		                    image_url: "https:\/\/maps.googleapis.com\/maps\/api\/staticmap?size=764x400&center=19.4406926,-99.2047001&zoom=18&markers=19.4406926,-99.2047001",
+		                    subtitle: 'A 0.8 km',
 		                    default_action: {
 		                        type: 'web_url',
-		                        url: 'https://google.com',
+		                        url: 'https:\/\/maps.apple.com\/maps?q=19.4406926,-99.2047001&z=16',
 		                        messenger_extensions: true,
 		                        webview_height_ratio: 'tall',
-		                        fallback_url: 'https://google.com'
-		                    },
-		                    buttons: [
-		                        {
-		                            title: 'Shop Now',
-		                            type: 'web_url',
-		                            url: 'https://google.comshop?item=102',
-		                            messenger_extensions: true,
-		                            webview_height_ratio: 'tall',
-		                            fallback_url: 'https://google.com'
-		                        }
-		                    ]
+		                        fallback_url: 'https:\/\/maps.apple.com\/maps?q=19.4406926,-99.2047001&z=16'
+		                    }
+		                },
+                    {
+		                    title: 'Marina nacional e isasaga colonia orera',
+		                    image_url: "https:\/\/maps.googleapis.com\/maps\/api\/staticmap?size=764x400&center=19.4406926,-99.2047001&zoom=18&markers=19.4406926,-99.2047001",
+		                    subtitle: 'A 0.8 km',
+		                    default_action: {
+		                        type: 'web_url',
+		                        url: 'https:\/\/maps.apple.com\/maps?q=19.4406926,-99.2047001&z=16',
+		                        messenger_extensions: true,
+		                        webview_height_ratio: 'tall',
+		                        fallback_url: 'https:\/\/maps.apple.com\/maps?q=19.4406926,-99.2047001&z=16'
+		                    }
 		                }
 		            ],
 		             buttons: [
 		                {
-		                    title: 'View More',
+		                    title: 'Ver más',
 		                    type: 'postback',
 		                    payload: 'payload'
 		                }
