@@ -121,7 +121,7 @@ if (!(APP_SECRET && VALIDATION_TOKEN && PAGE_ACCESS_TOKEN && SERVER_URL)) {
 var port = process.env.PORT || 4000
 app.set('port', port)
 
-app.set('views', path.join(__dirname, 'views'))
+app.set('views', path.join(__dirname, 'src/views'))
 app.set('view engine', 'pug')
 
 app.use(favicon(path.join(__dirname, 'src/public', 'favicon.ico')))
