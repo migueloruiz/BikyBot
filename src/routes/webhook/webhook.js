@@ -319,16 +319,18 @@ function sendList(recipientId, locations, coords){
 	}
 
 	for (var i = 0; i < 3; i++) {
+		let distance = `A ${distance(locations[i].loc,coords)} km`
 		let elementInList = {
 			title: locations[i].address,
 			image_url: `https:\/\/maps.googleapis.com\/maps\/api\/staticmap?size=764x400&center=${locations[i].loc[1]},${locations[i].loc[0]}&zoom=18&markers=${locations[i].loc[1]},${locations[i].loc[0]}`,
-			subtitle: `A ${distance(locations[i].loc,coords)} km`,
+			subtitle: distance,
 			default_action: {
 					type: 'web_url',
-					url: `https://bing.com/maps/default.aspx?cp=${locations[i].loc[1]}~${locations[i].loc[0]}&lvl=5`,
+					url:
+					`https://www.bing.com/maps/default.aspx?cp=${locations[i].loc[1]}~${locations[i].loc[0]}&lvl=18&style=o&sp=point.${locations[i].loc[1]}_${locations[i].loc[0]}_${locations[i].name}_${encodeURI(distance)}`,
 					messenger_extensions: true,
 					webview_height_ratio: 'tall',
-					fallback_url: `https://bing.com/maps/default.aspx?cp=${locations[i].loc[1]}~${locations[i].loc[0]}&lvl=5`
+					fallback_url: `https://www.bing.com/maps/default.aspx?cp=${locations[i].loc[1]}~${locations[i].loc[0]}&lvl=18&style=o&sp=point.${locations[i].loc[1]}_${locations[i].loc[0]}_${locations[i].name}_${encodeURI(distance)}`
 			}
 		}
 		messageData.message.attachment.payload.elements.push(elementInList);
