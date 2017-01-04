@@ -128,7 +128,7 @@ app.use(favicon(path.join(__dirname, 'src/public', 'favicon.ico')))
 app.use(compression())
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
-app.use(express.static(path.join(__dirname, 'public')))
+app.use(express.static(path.join(__dirname, 'src/public')))
 
 var server = http.createServer(app)
 server.on('error', onError)
