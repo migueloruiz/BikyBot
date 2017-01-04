@@ -22,6 +22,7 @@ mongoose.Promise = require('bluebird')
 // Models
 // ==========================
 var bikeStationModel = require(path.join(__dirname, '/models/bikeStation'))()
+var UserModel = require(path.join(__dirname, '/models/user'))()
 var BikeStation = mongoose.model('BikeStation')
 
 // Routes
@@ -45,51 +46,51 @@ const ECO_SECRET = process.env.ECO_CLIENT_SECRET
 // Databease Setup
 // ==========================
 async.auto({
-    get_ecobici_access: (cb) =>{
-			var url = `https://pubsbapi.smartbike.com/oauth/v2/token?client_id=${ECO_ID}&client_secret=${ECO_SECRET}&grant_type=client_credentials`
-			request(url, function (err, response, body) {
-				if (err) throw err
-				if (!err && response.statusCode == 200) {
-					var data = JSON.parse(body);
-					cb(null, data.access_token);
-				}
-			})
-    },
-		get_bikeStations: ['get_ecobici_access', (results, cb) => {
+  get_ecobici_access: (cb) =>{
+		var url = `https://pubsbapi.smartbike.com/oauth/v2/token?client_id=${ECO_ID}&client_secret=${ECO_SECRET}&grant_type=client_credentials`
+		request(url, function (err, response, body) {
+			if (err) throw err
+			if (!err && response.statusCode == 200) {
+				var data = JSON.parse(body);
+				cb(null, data.access_token);
+			}
+		})
+  },
+	get_bikeStations: ['get_ecobici_access', (results, cb) => {
 
-			var url = `https://pubsbapi.smartbike.com/api/v1/stations.json?access_token=${results.get_ecobici_access}`
-			request(url, function (err, response, body) {
-				if (err) throw err
-				if (!err && response.statusCode == 200) {
-					var data = JSON.parse(body);
-					cb(null, data.stations);
-				}
-			})
-		}],
-		set_db: ['get_ecobici_access','get_bikeStations', (results, cb) => {
-			mongoose.connect(`mongodb://${DB_USER}:${DB_PASSWORD}@${DB_URL}`, function (err) {
-			  if (err) {
-					console.log('Error DB')
-					throw err
-				}
+		var url = `https://pubsbapi.smartbike.com/api/v1/stations.json?access_token=${results.get_ecobici_access}`
+		request(url, function (err, response, body) {
+			if (err) throw err
+			if (!err && response.statusCode == 200) {
+				var data = JSON.parse(body);
+				cb(null, data.stations);
+			}
+		})
+	}],
+	set_db: ['get_ecobici_access','get_bikeStations', (results, cb) => {
+		mongoose.connect(`mongodb://${DB_USER}:${DB_PASSWORD}@${DB_URL}`, function (err) {
+		  if (err) {
+				console.log('Error DB')
+				throw err
+			}
 
-			  BikeStation.remove(function() {
-			    async.each(results.get_bikeStations, function(item, cb) {
-						var station = {
-							ecobici_id: item.id,
-							name: item.name,
-							address: item.address,
-							type: item.stationType,
-							loc: [item.location.lon, item.location.lat]
-						}
-			      BikeStation.create(station, cb)
-			    }, function(err) {
-			      if (err) throw err
-			    })
-			  })
-			})
+		  BikeStation.remove(function() {
+		    async.each(results.get_bikeStations, function(item, cb) {
+					var station = {
+						ecobici_id: item.id,
+						name: item.name,
+						address: item.address,
+						type: item.stationType,
+						loc: [item.location.lon, item.location.lat]
+					}
+		      BikeStation.create(station, cb)
+		    }, function(err) {
+		      if (err) throw err
+		    })
+		  })
+		})
 
-		}]
+	}]
 }, function(err, results) {
 		if(err)
 			throw err
