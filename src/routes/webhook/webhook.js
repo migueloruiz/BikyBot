@@ -74,9 +74,7 @@ function receivedMessage(event) {
 
 				async.auto({
 			    get_ecobici_access: (cb) =>{
-						console.log('entro')
 						var url = `https://pubsbapi.smartbike.com/oauth/v2/token?client_id=${process.env.ECO_CLIENT_ID}&client_secret=${process.env.ECO_CLIENT_SECRET}&grant_type=client_credentials`
-						console.log(url)
 						request(url, function (err, response, body) {
 							if (err) throw err
 							console.log(response.statusCode)
@@ -99,20 +97,18 @@ function receivedMessage(event) {
 						})
 					}],
 					getNearStations: ['get_ecobici_access','get_bikeStationStatus', (results, cb) => {
-						console.log('get list')
 					  //coordinates [ <longitude> , <latitude> ]
 					  var coords = [];
 					  coords[0] = location.long
 					  coords[1] = location.lat
-						var maxDistance = 2 //2 km   8/6371;
+						// var maxDistance = 2 //2 km   8/6371;
 
 					  BikeStation.find({
 					    loc: {
 					      $near: coords,
-					      $maxDistance: maxDistance
+					      // $maxDistance: maxDistance
 					    }
 					  }).limit(10).exec(function(err, locationsData) {
-							console.log('locatios',data);
 					  	if (err){
 								console.log(err);
 								return;
