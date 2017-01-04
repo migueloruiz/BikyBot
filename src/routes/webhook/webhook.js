@@ -327,7 +327,7 @@ function sendList(recipientId, locations, coords){
 			default_action: {
 					type: 'web_url',
 					url:
-					`${process.env.SERVER_URL}/map?user_lat=${locations[i].loc[0]}&user_long=${locations[i].loc[1]}&stat_lat=1${coords[1]}&stat_long=${coords[0]}`,
+					`${process.env.SERVER_URL}/map?user_lat=${locations[i].loc[1]}&user_long=${locations[i].loc[0]}&stat_lat=${coords[1]}&stat_long=${coords[0]}`,
 					messenger_extensions: true,
 					webview_height_ratio: 'tall',
 					fallback_url: `${process.env.SERVER_URL}/map?user_lat=${locations[i].loc[0]}&user_long=${locations[i].loc[1]}&stat_lat=1${coords[1]}&stat_long=${coords[0]}`
