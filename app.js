@@ -30,8 +30,10 @@ var webhook = require(path.join(__dirname, 'src/routes/webhook/webhook'))
 
 // Dev Dependences
 // ==========================
-var dotenv = require('dotenv')
-dotenv.load()
+if( process.env.NODE_ENV !== 'production' ){
+	var dotenv = require('dotenv')
+	dotenv.load()
+}
 
 const DB_USER = process.env.DB_USER
 const DB_PASSWORD = process.env.DB_PASSWORD
