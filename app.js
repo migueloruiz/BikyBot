@@ -30,6 +30,7 @@ var webhook = require(path.join(__dirname, 'src/routes/webhook/webhook'))
 
 // Dev Dependences
 // ==========================
+console.log(`================= ${process.env.NODE_ENV} mode =================`)
 if( process.env.NODE_ENV !== 'production' ){
 	var dotenv = require('dotenv')
 	dotenv.load()
