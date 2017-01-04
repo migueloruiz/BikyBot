@@ -10,8 +10,6 @@ var async = require('async')
 // ==========================
 var favicon = require('serve-favicon')
 var compression = require('compression')
-var logger = require('morgan')
-var cookieParser = require('cookie-parser')
 var bodyParser = require('body-parser')
 
 // Databease
@@ -21,15 +19,14 @@ mongoose.Promise = require('bluebird')
 
 // Models
 // ==========================
-var bikeStationModel = require(path.join(__dirname, '/models/bikeStation'))()
-var UserModel = require(path.join(__dirname, '/models/user'))()
+var bikeStationModel = require(path.join(__dirname, 'src/models/bikeStation'))()
+var UserModel = require(path.join(__dirname, 'src/models/user'))()
 var BikeStation = mongoose.model('BikeStation')
 
 // Routes
 // ==========================
-var index = require(path.join(__dirname, '/routes/index/index'))
-var users = require(path.join(__dirname, '/routes/users/users'))
-var webhook = require(path.join(__dirname, '/routes/webhook/webhook'))
+var index = require(path.join(__dirname, 'src/routes/index/index'))
+var webhook = require(path.join(__dirname, 'src/routes/webhook/webhook'))
 
 // Dev Dependences
 // ==========================
@@ -124,13 +121,10 @@ app.set('port', port)
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'pug')
 
-app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')))
+app.use(favicon(path.join(__dirname, 'src/public', 'favicon.ico')))
 app.use(compression())
-app.use(logger('dev'))
 app.use(bodyParser.json())
-// app.use(bodyParser.json({ verify: verifyRequestSignature }))
 app.use(bodyParser.urlencoded({ extended: false }))
-app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
 var server = http.createServer(app)
@@ -140,7 +134,6 @@ server.on('listening', onListening)
 // Routes Setup
 // ==========================
 app.use('/', index)
-app.use('/users', users)
 app.use('/webhook', webhook)
 
 // Event listener for HTTP server "error" event.
@@ -196,6 +189,6 @@ app.use(function (err, req, res, next) {
 // Start Listen Serve
 // ==========================
 app.listen(app.get('port'), function () {
-  console.log('Node app is running on port', app.get('port'))
+  console.log( process.env.PROJECT + ' on port', app.get('port'))
 })
 module.exports = app
