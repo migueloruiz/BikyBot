@@ -26,6 +26,7 @@ var BikeStation = mongoose.model('BikeStation')
 // Routes
 // ==========================
 var index = require(path.join(__dirname, 'src/routes/index/index'))
+var map = require(path.join(__dirname, 'src/routes/map/map'))
 var webhook = require(path.join(__dirname, 'src/routes/webhook/webhook'))
 
 // Dev Dependences
@@ -111,7 +112,6 @@ if (!(APP_SECRET && VALIDATION_TOKEN && PAGE_ACCESS_TOKEN && SERVER_URL)) {
   console.error('Missing config values')
   process.exit(1)
 } else {
-  console.log(APP_SECRET)
   app.set('APP_SECRET', APP_SECRET)
   app.set('VALIDATION_TOKEN', VALIDATION_TOKEN)
   app.set('PAGE_ACCESS_TOKEN', PAGE_ACCESS_TOKEN)
@@ -138,6 +138,7 @@ server.on('listening', onListening)
 // ==========================
 app.use('/', index)
 app.use('/webhook', webhook)
+app.use('/map', map)
 
 // Event listener for HTTP server "error" event.
 // ==========================
