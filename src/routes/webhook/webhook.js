@@ -118,7 +118,7 @@ function receivedMessage(event) {
 								cb(null, locationsData);
 							}else{
 								sendTextMessage(senderID, 'Lo lamento no hay estaciones cerca de tu ubicación');
-								cb('Lo lamento no hay estaciones cerca de tu ubicaccion', null);
+								cb('Lo lamento no hay estaciones cerca de tu ubicacción', null);
 							}
 						})
 					}]
@@ -172,7 +172,7 @@ function receivedPostback(event) {
 				});
 			break;
 		case 'NOT_ACTIVE':
-				sendTextMessage(senderID, 'Por el momento esta funcion no esta disponible');
+				sendTextMessage(senderID, 'Por el momento esta función no esta disponible');
 			break;
 		default:
 			sendTextMessage(senderID, payload);
@@ -207,8 +207,8 @@ function sendWelcomeMessage(recipientId) {
           template_type: "generic",
           elements: [
             {
-              title: '¡Hola! ¿En que te podemos ayudar?',
-              subtitle: 'Hacemos te tu viaje el mas sencillo 🚴',
+              title: '¡Hola!, ¿En qué podemos ayudarte?',
+              subtitle: 'Hacemos de tu viaje el más sencillo 🚴',
               image_url: "https://baconmockup.com/300/200",
               buttons: [
 								{ type:'postback', title:'Encontrar Bici', payload:'GET_BIKE' },
@@ -237,7 +237,7 @@ function sendApologizeMessage(recipientId) {
           template_type: "generic",
           elements: [
             {
-              title: '¡Aun no soy tan listo! 😅 ',
+              title: '¡Aún no soy tan listo! 😅',
               subtitle: 'Por el momento te puedo ayudar con estas tareas 💪',
               image_url: "https://baconmockup.com/300/200",
               buttons: [
@@ -255,7 +255,7 @@ function sendApologizeMessage(recipientId) {
 }
 
 function sendLocationReply(recipientId) {
-	let qArray = ["¿Cual es tu ubicacion?", "¿Donde estas?", "¿Por donde andas?", "¿Me conpartes tu ubicación?"]
+	let qArray = ["¿Cuál es tu ubicación?", "¿Dónde estás?", "¿Por dónde estas?", "¿Me conpartes tu ubicación?"]
 	let text = qArray[ Math.round( Math.random() * qArray.lenght - 1 ) ]
 
   var messageData = {
@@ -299,7 +299,7 @@ function sendList(recipientId, locations, coords){
 		                {
 		                    title: 'Estaciones más cercanas',
 		                    image_url: process.env.SERVER_URL + "/assets/images/fondo.jpg",
-		                    subtitle: 'En estas estaciones hay lugare disponibles'
+		                    subtitle: 'Aquí hay lugares disponibles'
 		                }
 		            ],
 		             buttons: [
