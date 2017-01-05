@@ -42,7 +42,7 @@ function receivedMessage(event) {
 	// let quick_reply = message.quick_reply;
   // if (quick_reply) {
   //   var quickReplyPayload = quick_reply.payload;
-  //   sendTextMessage(senderID, "Quick reply tapped");
+  //   sendTextMessage(senderID, 'Quick reply tapped');
   //   return;
   // }
 
@@ -56,9 +56,7 @@ function receivedMessage(event) {
 			case 'gracias':
 			case 'Gracias':
 			case 'grax':
-				sendTextMessage(senderID, 'Es un gusto ayudarte 😄');
-				sendTextMessage(senderID, 'Puedes compartirme con un amigo con este link https://goo.gl/r7WMVl');
-				sendTextMessage(senderID, 'Esta es mi paguina https://www.facebook.com/ecobotMX/');
+				sendGraitudeMessage(senderID);
 				return;
       default:
         sendApologizeMessage(senderID)
@@ -194,7 +192,7 @@ function sendTextMessage(recipientId, messageText) {
     },
     message: {
       text: messageText,
-      metadata: "DEVELOPER_DEFINED_METADATA"
+      metadata: 'DEVELOPER_DEFINED_METADATA'
     }
   };
 
@@ -209,14 +207,14 @@ function sendWelcomeMessage(recipientId) {
     },
     message: {
       attachment: {
-        type: "template",
+        type: 'template',
         payload: {
-          template_type: "generic",
+          template_type: 'generic',
           elements: [
             {
               title: '¡Hola!, ¿En qué podemos ayudarte?',
               subtitle: 'Te ayudo en tu recorrido diario.',
-              image_url: "https://baconmockup.com/300/200",
+              image_url: 'https://baconmockup.com/300/200',
               buttons: [
 								{ type:'postback', title:'Buscar Bici', payload:'GET_BIKE' },
 						    { type:'postback', title:'Encontrar Espacio', payload:'GET_SLOT'}
@@ -231,6 +229,11 @@ function sendWelcomeMessage(recipientId) {
   callSendAPI(messageData);
 }
 
+function sendGraitudeMessage(recipientId){
+	let gratitude = ['Es un gusto ayudarte 😄', 'Puedes compartirme con un amigo con este link https://goo.gl/r7WMVl', 'Esta es mi  página https://www.facebook.com/ecobotMX/']
+	sendTextMessage(senderID, gratitude[Math.floor(Math.random()*gratitude.length)]);
+}
+
 function sendApologizeMessage(recipientId) {
 
   var messageData = {
@@ -239,14 +242,14 @@ function sendApologizeMessage(recipientId) {
     },
     message: {
       attachment: {
-        type: "template",
+        type: 'template',
         payload: {
-          template_type: "generic",
+          template_type: 'generic',
           elements: [
             {
               title: '¡Aún no soy tan listo! 😅',
               subtitle: 'Por el momento te puedo ayudar con estas tareas 💪',
-              image_url: "https://baconmockup.com/300/200",
+              image_url: 'https://baconmockup.com/300/200',
               buttons: [
 								{ type:'postback', title:'Encontrar 🚲', payload:'GET_BIKE' },
 						    { type:'postback', title:'Encontrar 🅿️', payload:'GET_SLOT'}
@@ -262,16 +265,16 @@ function sendApologizeMessage(recipientId) {
 }
 
 function sendLocationReply(recipientId) {
-	let qArray = ["¿Cuál es tu ubicación?", "¿Dónde estás?", "¿Por dónde estas?", "¿Me conpartes tu ubicación?"]
-	let text = qArray[ Math.round( Math.random() * qArray.lenght - 1 ) ]
+	let qArray = ['¿Cuál es tu ubicación?', '¿Dónde estás?', '¿Por dónde estas?', '¿Me conpartes tu ubicación?']
+	let text = qArray[ Math.floor(Math.random()*qArray.length) ]
 
   var messageData = {
     recipient: {
       id: recipientId
     },
     message: {
-      text: "¿Cual es tu ubicación?",
-      quick_replies: [{ "content_type":"location" }]
+      text: 'text',
+      quick_replies: [{ 'content_type':'location' }]
     }
   };
 
@@ -280,12 +283,12 @@ function sendLocationReply(recipientId) {
 
 function sendTyping(event, enable) {
 	var senderID = event.sender.id;
-  console.log( ( enable ) ? "typing_on" : "typing_off" );
+  console.log( ( enable ) ? 'typing_on' : 'typing_off' );
   var messageData = {
     recipient: {
       id: senderID
     },
-    sender_action: ( enable ) ? "typing_on" : "typing_off"
+    sender_action: ( enable ) ? 'typing_on' : 'typing_off'
   };
   callSendAPI(messageData);
 }
@@ -305,7 +308,7 @@ function sendList(recipientId, locations, coords){
 		            elements: [
 		                {
 		                    title: 'Estaciones más cercanas',
-		                    image_url: process.env.SERVER_URL + "/assets/images/fondo.jpg",
+		                    image_url: process.env.SERVER_URL + '/assets/images/fondo.jpg',
 		                    subtitle: 'Aquí hay lugares disponibles'
 		                }
 		            ],
@@ -378,14 +381,14 @@ function callSendAPI(messageData) {
       var messageId = body.message_id;
 
       if (messageId) {
-        console.log("Successfully sent message with id %s to recipient %s",
+        console.log('Successfully sent message with id %s to recipient %s',
           messageId, recipientId);
       } else {
-      console.log("Successfully called Send API for recipient %s",
+      console.log('Successfully called Send API for recipient %s',
         recipientId);
       }
     } else {
-      console.error("Failed calling Send API", response.statusCode, response.statusMessage, body.error);
+      console.error('Failed calling Send API', response.statusCode, response.statusMessage, body.error);
     }
   });
 }
