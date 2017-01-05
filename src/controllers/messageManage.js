@@ -4,6 +4,7 @@ var BikeStation = mongoose.model('BikeStation');
 var User = mongoose.model('User')
 var path = require('path')
 var messagerApi = require(path.join(__dirname, 'messegerApi'))
+var request = require('request');
 
 
 module.exports = {
