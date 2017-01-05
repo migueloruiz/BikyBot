@@ -53,6 +53,12 @@ function receivedMessage(event) {
 			case 'Hola':
 				sendWelcomeMessage(senderID);
 				return;
+			case 'gracias':
+			case 'Gracias':
+			case 'grax':
+				sendTextMessage(senderID, 'Es un gusto ayudarte 😄');
+				sendTextMessage(senderID, 'Puedes compartirme con un amigo con este link https://m.me/1085397894889504');
+				return;
       default:
         sendApologizeMessage(senderID)
 				return;
