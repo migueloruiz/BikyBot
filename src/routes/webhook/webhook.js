@@ -117,7 +117,7 @@ function receivedMessage(event) {
 								sendList(senderID, locationsData, coords)
 								cb(null, locationsData);
 							}else{
-								sendTextMessage(senderID, 'Lo lamento no hay estaciones cerca de tu ubicaccion');
+								sendTextMessage(senderID, 'Lo lamento no hay estaciones cerca de tu ubicación');
 								cb('Lo lamento no hay estaciones cerca de tu ubicaccion', null);
 							}
 						})
@@ -255,7 +255,7 @@ function sendApologizeMessage(recipientId) {
 }
 
 function sendLocationReply(recipientId) {
-	let qArray = ["¿Cual es tu ubucacion?", "¿Donde estas?", "¿Por donde andas?", "¿Me conpartes tu ubicacion?"]
+	let qArray = ["¿Cual es tu ubicacion?", "¿Donde estas?", "¿Por donde andas?", "¿Me conpartes tu ubicación?"]
 	let text = qArray[ Math.round( Math.random() * qArray.lenght - 1 ) ]
 
   var messageData = {
@@ -263,7 +263,7 @@ function sendLocationReply(recipientId) {
       id: recipientId
     },
     message: {
-      text: "¿Cual es tu ubucacion?",
+      text: "¿Cual es tu ubicación?",
       quick_replies: [{ "content_type":"location" }]
     }
   };
@@ -326,7 +326,7 @@ function sendList(recipientId, locations, coords){
 					`${process.env.SERVER_URL}/map?user_lat=${locations[i].loc[1]}&user_long=${locations[i].loc[0]}&stat_lat=${coords[1]}&stat_long=${coords[0]}`,
 					messenger_extensions: true,
 					webview_height_ratio: 'tall',
-					fallback_url: `${process.env.SERVER_URL}/map?user_lat=${locations[i].loc[1]}&user_long=${locations[i].loc[0]}&stat_lat=1${coords[1]}&stat_long=${coords[0]}`
+					fallback_url: `${process.env.SERVER_URL}/map?user_lat=${locations[i].loc[1]}&user_long=${locations[i].loc[0]}&stat_lat=${coords[1]}&stat_long=${coords[0]}`
 			}
 		}
 		messageData.message.attachment.payload.elements.push(elementInList);
