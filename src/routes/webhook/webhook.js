@@ -214,10 +214,10 @@ function sendWelcomeMessage(recipientId) {
           elements: [
             {
               title: '¡Hola!, ¿En qué podemos ayudarte?',
-              subtitle: 'Hacemos de tu viaje el más sencillo 🚴',
+              subtitle: 'Te ayudo en tu recorrido diario.',
               image_url: "https://baconmockup.com/300/200",
               buttons: [
-								{ type:'postback', title:'Encontrar Bici', payload:'GET_BIKE' },
+								{ type:'postback', title:'Buscar Bici', payload:'GET_BIKE' },
 						    { type:'postback', title:'Encontrar Espacio', payload:'GET_SLOT'}
               ]
             }
