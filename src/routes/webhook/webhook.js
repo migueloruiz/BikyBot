@@ -1,7 +1,7 @@
 var express = require('express')
 var router = express.Router()
 var path = require('path')
-var messageManage = require(path.join(__dirname, '../../controllers/MessageManage'))
+var messageManage = require(path.join(__dirname, '../../controllers/messageManage'))
 
 router.get('/', function (req, res) {
   if (req.query['hub.mode'] === 'subscribe' &&
