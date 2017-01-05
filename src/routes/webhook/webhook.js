@@ -57,7 +57,8 @@ function receivedMessage(event) {
 			case 'Gracias':
 			case 'grax':
 				sendTextMessage(senderID, 'Es un gusto ayudarte 😄');
-				sendTextMessage(senderID, 'Puedes compartirme con un amigo con este link https://m.me/1085397894889504');
+				sendTextMessage(senderID, 'Puedes compartirme con un amigo con este link https://goo.gl/r7WMVl');
+				sendTextMessage(senderID, 'Esta es mi paguina https://www.facebook.com/ecobotMX/');
 				return;
       default:
         sendApologizeMessage(senderID)
