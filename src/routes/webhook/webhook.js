@@ -273,7 +273,7 @@ function sendLocationReply(recipientId) {
       id: recipientId
     },
     message: {
-      text: 'text',
+      text: text,
       quick_replies: [{ 'content_type':'location' }]
     }
   };
