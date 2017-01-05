@@ -312,19 +312,26 @@ function sendList(recipientId, locations, coords){
 		                    subtitle: 'Aquí hay lugares disponibles'
 		                }
 		            ],
-		             buttons: [
-		                {
-		                    title: 'Ver más',
-		                    type: 'postback',
-		                    payload: 'NOT_ACTIVE'
-		                }
-		            ]
+		            buttons: []
 		        }
 		    }
 		}
 	}
 
+	var morePayload = {
+		long: coords[0],
+		lat: coords[1],
+		stationsSeen: []
+	}
+
+	var moreButton = {
+			title: 'Ver más',
+			type: 'postback',
+			payload: ''
+	}
+
 	for (var i = 0; i < 3; i++) {
+		morePayload.stationsSeen.push(locations[i].ecobici_id);
 		let distanceText = `A ${distance(locations[i].loc,coords)} km`
 		let elementInList = {
 			title: locations[i].address,
@@ -341,6 +348,9 @@ function sendList(recipientId, locations, coords){
 		}
 		messageData.message.attachment.payload.elements.push(elementInList);
 	}
+
+	moreButton.payload = JSON.stringify(morePayload);
+	messageData.message.attachment.payload.buttons.push(moreButton);
 
 	callSendAPI(messageData);
 }
