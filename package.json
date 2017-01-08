@@ -3,17 +3,18 @@
   "version": "0.0.1",
   "scripts": {
     "start": "node app.js",
-		"test": "nodemon app.js"
+    "test": "nodemon app.js"
   },
-	"engines": {
-		"node": "6.8.0"
-	},
+  "engines": {
+    "node": "6.8.0"
+  },
   "dependencies": {
     "async": "^2.1.4",
     "bluebird": "^3.4.7",
     "body-parser": "~1.15.2",
     "compression": "^1.6.2",
     "debug": "~2.2.0",
+    "envalid": "^2.4.2",
     "express": "^4.14.0",
     "moment": "^2.17.1",
     "mongoose": "^4.7.5",
@@ -23,7 +24,6 @@
   },
   "devDependencies": {
     "browser-sync": "^2.18.5",
-    "dotenv": "^2.0.0",
     "gulp": "^3.9.1",
     "gulp-node-inspector": "^0.1.0",
     "gulp-nodemon": "^2.2.1",

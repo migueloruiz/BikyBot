@@ -17,6 +17,32 @@ var bodyParser = require('body-parser')
 var mongoose = require('mongoose')
 mongoose.Promise = require('bluebird')
 
+// Environment Variables
+// ==========================
+const envalid = require('envalid')
+const { str } = envalid
+console.log(`================= ${process.env.NODE_ENV} mode =================`)
+const env = envalid.cleanEnv(process.env, {
+	PROJECT: str(),
+	SERVER_URL: str(),
+	FB_APP_ID: str(),
+	FB_APP_SECRET: str(),
+	FB_PAGE_ID: str(),
+	PAGE_ACCES_TOKEN: str(),
+	VALIDATION_TOKEN: str(),
+	DB_URL: str(),
+	ECO_CLIENT_ID: str(),
+	ECO_CLIENT_SECRET: str(),
+	MAPS_KEY: str()
+})
+
+const ECO_ID = process.env.ECO_CLIENT_ID
+const ECO_SECRET = process.env.ECO_CLIENT_SECRET
+
+const APP_SECRET = process.env.FB_APP_SECRET
+const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCES_TOKEN
+const SERVER_URL = process.env.SERVER_URL
+
 // Models
 // ==========================
 var bikeStationModel = require(path.join(__dirname, 'src/models/bikeStation'))()
@@ -28,21 +54,6 @@ var BikeStation = mongoose.model('BikeStation')
 var index = require(path.join(__dirname, 'src/routes/index/index'))
 var map = require(path.join(__dirname, 'src/routes/map/map'))
 var webhook = require(path.join(__dirname, 'src/routes/webhook/webhook'))
-
-// Dev Dependences
-// ==========================
-console.log(`================= ${process.env.NODE_ENV} mode =================`)
-if( process.env.NODE_ENV !== 'production' ){
-	var dotenv = require('dotenv')
-	dotenv.load()
-}
-
-const DB_USER = process.env.DB_USER
-const DB_PASSWORD = process.env.DB_PASSWORD
-const DB_URL = process.env.DB_URL
-
-const ECO_ID = process.env.ECO_CLIENT_ID
-const ECO_SECRET = process.env.ECO_CLIENT_SECRET
 
 // Databease Setup
 // ==========================
@@ -69,7 +80,7 @@ async.auto({
 		})
 	}],
 	set_db: ['get_ecobici_access','get_bikeStations', (results, cb) => {
-		mongoose.connect(`mongodb://${DB_USER}:${DB_PASSWORD}@${DB_URL}`, function (err) {
+		mongoose.connect( process.env.DB_URL , function (err) {
 		  if (err) {
 				console.log('Error DB')
 				throw err
@@ -101,22 +112,7 @@ async.auto({
 // Server Setup
 // ==========================
 
-const APP_SECRET = process.env.FB_APP_SECRET
-const VALIDATION_TOKEN = process.env.VALIDATION_TOKEN
-const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCES_TOKEN
-const SERVER_URL = process.env.SERVER_URL
-
 var app = express()
-
-if (!(APP_SECRET && VALIDATION_TOKEN && PAGE_ACCESS_TOKEN && SERVER_URL)) {
-  console.error('Missing config values')
-  process.exit(1)
-} else {
-  app.set('APP_SECRET', APP_SECRET)
-  app.set('VALIDATION_TOKEN', VALIDATION_TOKEN)
-  app.set('PAGE_ACCESS_TOKEN', PAGE_ACCESS_TOKEN)
-  app.set('SERVER_URL', SERVER_URL)
-}
 
 var port = process.env.PORT || 4000
 app.set('port', port)

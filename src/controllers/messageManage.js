@@ -6,7 +6,6 @@ var path = require('path')
 var messagerApi = require(path.join(__dirname, 'messegerApi'))
 var request = require('request');
 
-
 module.exports = {
 	processMessage: function ( messageData ) {
 		messageData.entry.forEach(function(pageEntry) {
@@ -136,7 +135,7 @@ function receivedPostback(event) {
 			break;
 		case 'GET_SLOT':
 		case 'GET_BIKE':
-				User.find({ sernder_id: senderID }, function(err, data) {
+				User.find({ sender_id: senderID }, function(err, data) {
 				  if (err) throw err;
 
 					console.log('Search',data);
