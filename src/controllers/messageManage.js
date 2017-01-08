@@ -132,6 +132,7 @@ function receivedPostback(event) {
 	switch (payload) {
 		case 'START':
 				sendWelcomeMessage(senderID);
+				return;
 			break;
 		case 'GET_SLOT':
 		case 'GET_BIKE':
@@ -141,11 +142,7 @@ function receivedPostback(event) {
 					console.log('Search',data);
 					if( data.length > 0 ){
 						data[0].status = payload;
-						data[0].save(function(err) {
-							console.log('Base de datos')
-					    if (err) throw err;
-					    console.log('User successfully updated!');
-					  });
+						data[0].save(function(err) { if (err) throw err; });
 						sendLocationReply(senderID);
 					}else{
 						let userItem = {
@@ -158,12 +155,15 @@ function receivedPostback(event) {
 						sendLocationReply(senderID);
 					}
 				});
+				return;
 			break;
 		case 'NOT_ACTIVE':
 				sendTextMessage(senderID, 'Por el momento esta función no esta disponible');
+				return;
 			break;
 		default:
 			sendTextMessage(senderID, payload);
+			return;
 	}
 
 }
@@ -267,7 +267,6 @@ function sendLocationReply(recipientId) {
 
 function sendTyping(event, enable) {
 	var senderID = event.sender.id;
-  console.log( ( enable ) ? 'typing_on' : 'typing_off' );
   var messageData = {
     recipient: {
       id: senderID
