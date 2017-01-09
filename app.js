@@ -104,7 +104,7 @@ async.auto({
 
 function sanitizeName( str ){
 	if( str.charAt(0) == ' ' ) return str.slice(1)
-	if( parseInt(str.charAt(0)) != null ) return sanitizeName( str.slice(1).replace('-', ' y ').capitalize(true).replace(' y ', ' Y ') )
+	if( parseInt(str.charAt(0)) != null ) return sanitizeName( str.slice(1).replace('-', ' y ').capitalize(true).replace(' Y ', ' y ') )
 }
 
 String.prototype.capitalize = function(lower) {
