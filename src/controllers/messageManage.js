@@ -311,7 +311,7 @@ function sendList(recipientId, locations, coords){
 
 	for (var i = 0; i < 3; i++) {
 		morePayload.stationsSeen.push(locations[i].ecobici_id);
-		let distanceText = `+5 bicis - ${distance(locations[i].loc,coords)} km`
+		let distanceText = `5 🚲 - ${distance(locations[i].loc,coords)} km`
 		let elementInList = {
 			title: locations[i].name,
 			// image_url: `https:\/\/maps.googleapis.com\/maps\/api\/staticmap?size=764x400&center=${locations[i].loc[1]},${locations[i].loc[0]}&zoom=19&markers=${locations[i].loc[1]},${locations[i].loc[0]}`,
