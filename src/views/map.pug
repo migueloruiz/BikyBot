@@ -59,7 +59,7 @@ html
 					service.route({
 						origin: src,
 						destination: des,
-						travelMode: google.maps.DirectionsTravelMode.BICYCLING
+						travelMode: google.maps.DirectionsTravelMode.WALKING
 					}, function (result, status) {
 						if (status == google.maps.DirectionsStatus.OK) {
 							for (var i = 0, len = result.routes[0].overview_path.length; i < len; i++) {
