@@ -104,8 +104,12 @@ async.auto({
 
 function sanitizeName( str ){
 	if( str.charAt(0) == ' ' ) return str.slice(1)
-	if( parseInt(str.charAt(0)) != null ) return sanitizeName( str.slice(1) )
+	if( parseInt(str.charAt(0)) != null ) return sanitizeName( str.slice(1).capitalize(true); )
 }
+
+String.prototype.capitalize = function(lower) {
+  return (lower ? this.toLowerCase() : this).replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
+};
 
 // Server Setup
 // ==========================
