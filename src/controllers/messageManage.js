@@ -313,7 +313,7 @@ function sendList(recipientId, locations, coords){
 		let distanceText = `A ${distance(locations[i].loc,coords)} km`
 		let elementInList = {
 			title: locations[i].name,
-			image_url: `https:\/\/maps.googleapis.com\/maps\/api\/staticmap?size=764x400&center=${locations[i].loc[1]},${locations[i].loc[0]}&zoom=19&markers=${locations[i].loc[1]},${locations[i].loc[0]}`,
+			// image_url: `https:\/\/maps.googleapis.com\/maps\/api\/staticmap?size=764x400&center=${locations[i].loc[1]},${locations[i].loc[0]}&zoom=19&markers=${locations[i].loc[1]},${locations[i].loc[0]}`,
 			subtitle: distanceText,
 			default_action: {
 					type: 'web_url',
