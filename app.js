@@ -36,13 +36,6 @@ const env = envalid.cleanEnv(process.env, {
 	MAPS_KEY: str()
 })
 
-const ECO_ID = process.env.ECO_CLIENT_ID
-const ECO_SECRET = process.env.ECO_CLIENT_SECRET
-
-const APP_SECRET = process.env.FB_APP_SECRET
-const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCES_TOKEN
-const SERVER_URL = process.env.SERVER_URL
-
 // Models
 // ==========================
 var bikeStationModel = require(path.join(__dirname, 'src/models/bikeStation'))()
@@ -59,7 +52,7 @@ var webhook = require(path.join(__dirname, 'src/routes/webhook/webhook'))
 // ==========================
 async.auto({
   get_ecobici_access: (cb) =>{
-		var url = `https://pubsbapi.smartbike.com/oauth/v2/token?client_id=${ECO_ID}&client_secret=${ECO_SECRET}&grant_type=client_credentials`
+		var url = `https://pubsbapi.smartbike.com/oauth/v2/token?client_id=${process.env.ECO_CLIENT_ID}&client_secret=${process.env.ECO_CLIENT_SECRET}&grant_type=client_credentials`
 		request(url, function (err, response, body) {
 			if (err) throw err
 			if (!err && response.statusCode == 200) {
@@ -88,9 +81,10 @@ async.auto({
 
 		  BikeStation.remove(function() {
 		    async.each(results.get_bikeStations, function(item, cb) {
+
 					var station = {
 						ecobici_id: item.id,
-						name: item.name,
+						name: sanitizeName( item.name ),
 						address: item.address,
 						type: item.stationType,
 						loc: [item.location.lon, item.location.lat]
@@ -107,6 +101,11 @@ async.auto({
 		if(err)
 			throw err
 });
+
+function sanitizeName( str ){
+	if( str.charAt(0) == ' ' ) return str.slice(1)
+	if( parseInt(str.charAt(0)) != null ) return sanitizeName( str.slice(1) )
+}
 
 // Server Setup
 // ==========================
