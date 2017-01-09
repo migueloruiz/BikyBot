@@ -314,7 +314,9 @@ function sendList(recipientId, locations, coords){
 		let distanceText = `5 🚲 - ${distance(locations[i].loc,coords)} km`
 		let elementInList = {
 			title: locations[i].name,
-			image_url: `https:\/\/maps.googleapis.com\/maps\/api\/staticmap?size=100x100&center=${locations[i].loc[1]},${locations[i].loc[0]}&zoom=15&markers=${locations[i].loc[1]},${locations[i].loc[0]}`,
+			image_url: `https:\/\/maps.googleapis.com\/maps\/api\/staticmap?size=200x200&scale=2&center=${locations[i].loc[1]},${locations[i].loc[0]}&zoom=16&markers=${locations[i].loc[1]},${locations[i].loc[0]}`,
+			// 19.4406926,-99.2047001
+			// https://maps.googleapis.com/maps/api/staticmap?size=100x100&scale=2&center=19.4406926,-99.2047001&zoom=15&markers=19.4406926,-99.2047001
 			subtitle: distanceText,
 			default_action: {
 					type: 'web_url',
