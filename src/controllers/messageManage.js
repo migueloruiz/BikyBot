@@ -312,7 +312,7 @@ function sendList(recipientId, locations, coords){
 		morePayload.stationsSeen.push(locations[i].ecobici_id);
 		let distanceText = `A ${distance(locations[i].loc,coords)} km`
 		let elementInList = {
-			title: locations[i].address,
+			title: locations[i].name,
 			image_url: `https:\/\/maps.googleapis.com\/maps\/api\/staticmap?size=764x400&center=${locations[i].loc[1]},${locations[i].loc[0]}&zoom=18&markers=${locations[i].loc[1]},${locations[i].loc[0]}`,
 			subtitle: distanceText,
 			default_action: {
