@@ -106,7 +106,6 @@ async.auto({
 }, function(err, results) {
 		if(err)
 			throw err
-    console.log('Server Init');
 });
 
 // Server Setup

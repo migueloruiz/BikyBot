@@ -39,7 +39,7 @@ function receivedMessage(event) {
 			case 'gracias':
 			case 'Gracias':
 			case 'grax':
-				sendGraitudeMessage(senderID);
+				sendGraitudeMessage(recipientId);
 				return;
       default:
         sendApologizeMessage(senderID)
@@ -47,81 +47,80 @@ function receivedMessage(event) {
     }
   }
 
-	let attachment = message.attachments.filter((item)=>{
-		return item.type == 'location'
-	});
-
-	if( attachment.length > 0 ){
-		User.find({ sender_id: senderID }, function(err, data) {
-			if (err) throw err;
-
-			if( data.length > 0 ){
-				let status = data[0].status;
-				let location = attachment[0].payload.coordinates;
-				console.log(location)
-
-				async.auto({
-			    get_ecobici_access: (cb) =>{
-						var url = `https://pubsbapi.smartbike.com/oauth/v2/token?client_id=${process.env.ECO_CLIENT_ID}&client_secret=${process.env.ECO_CLIENT_SECRET}&grant_type=client_credentials`
-						request(url, function (err, response, body) {
-							if (err) throw err
-							console.log(response.statusCode)
-							if (!err && response.statusCode == 200) {
-								var data = JSON.parse(body);
-								console.log(data.access_token)
-								cb(null, data.access_token);
-							}
-						})
-			    },
-					get_bikeStationStatus: ['get_ecobici_access', (results, cb) => {
-
-						var url = `https://pubsbapi.smartbike.com/api/v1/stations/status.json?access_token=${results.get_ecobici_access}`
-						request(url, function (err, response, body) {
-							if (err) throw err
-							if (!err && response.statusCode == 200) {
-								var data = JSON.parse(body);
-								cb(null, data.stationsStatus);
-							}
-						})
-					}],
-					getNearStations: ['get_ecobici_access','get_bikeStationStatus', (results, cb) => {
-					  //coordinates [ <longitude> , <latitude> ]
-					  var coords = [];
-					  coords[0] = location.long
-					  coords[1] = location.lat
-						// var maxDistance = 2 //2 km   8/6371;
-
-					  BikeStation.find({
-					    loc: {
-					      $near: coords,
-					      // $maxDistance: maxDistance
-					    }
-					  }).limit(10).exec(function(err, locationsData) {
-					  	if (err){
-								console.log(err);
-								return;
-							}
-							if(locationsData.length > 0){
-								sendList(senderID, locationsData, coords)
-								cb(null, locationsData);
-							}else{
-								sendTextMessage(senderID, 'Lo lamento no hay estaciones cerca de tu ubicación');
-								cb('Lo lamento no hay estaciones cerca de tu ubicacción', null);
-							}
-						})
-					}]
-				}, function(err, results) {
-						console.log(err)
-						if(err) throw err
-						User.remove(function(err) {
-					    if (err) throw err;
-					    console.log('User successfully deleted!');
-					  });
-						return;
-				});
-			}
+	if(message.attachments){
+		let attachment = message.attachments.filter((item)=>{
+			return item.type == 'location'
 		});
+
+		if( attachment.length > 0 ){
+			User.find({ sender_id: senderID }, function(err, data) {
+				if (err) throw err;
+
+				if( data.length > 0 ){
+					let status = data[0].status;
+					let location = attachment[0].payload.coordinates;
+
+					async.auto({
+				    get_ecobici_access: (cb) =>{
+							var url = `https://pubsbapi.smartbike.com/oauth/v2/token?client_id=${process.env.ECO_CLIENT_ID}&client_secret=${process.env.ECO_CLIENT_SECRET}&grant_type=client_credentials`
+							request(url, function (err, response, body) {
+								if (err) throw err
+								if (!err && response.statusCode == 200) {
+									var data = JSON.parse(body);
+									cb(null, data.access_token);
+								}
+							})
+				    },
+						get_bikeStationStatus: ['get_ecobici_access', (results, cb) => {
+
+							var url = `https://pubsbapi.smartbike.com/api/v1/stations/status.json?access_token=${results.get_ecobici_access}`
+							request(url, function (err, response, body) {
+								if (err) throw err
+								if (!err && response.statusCode == 200) {
+									var data = JSON.parse(body);
+									cb(null, data.stationsStatus);
+								}
+							})
+						}],
+						getNearStations: ['get_ecobici_access','get_bikeStationStatus', (results, cb) => {
+						  //coordinates [ <longitude> , <latitude> ]
+						  var coords = [];
+						  coords[0] = location.long
+						  coords[1] = location.lat
+							// var maxDistance = 2 //2 km   8/6371;
+
+						  BikeStation.find({
+						    loc: {
+						      $near: coords,
+						      // $maxDistance: maxDistance
+						    }
+						  }).limit(10).exec(function(err, locationsData) {
+						  	if (err){
+									console.log(err);
+									return;
+								}
+								if(locationsData.length > 0){
+									sendList(senderID, locationsData, coords)
+									cb(null, locationsData);
+								}else{
+									sendTextMessage(senderID, 'Lo lamento no hay estaciones cerca de tu ubicación');
+									cb('Lo lamento no hay estaciones cerca de tu ubicacción', null);
+								}
+							})
+						}]
+					}, function(err, results) {
+							console.log(err)
+							if(err) throw err
+							User.remove(function(err) { if (err) throw err;});
+					});
+				}
+			});
+		}
 	}
+}
+
+function receivedAttachment(event){
+
 }
 
 function receivedPostback(event) {
@@ -139,7 +138,6 @@ function receivedPostback(event) {
 				User.find({ sender_id: senderID }, function(err, data) {
 				  if (err) throw err;
 
-					console.log('Search',data);
 					if( data.length > 0 ){
 						data[0].status = payload;
 						data[0].save(function(err) { if (err) throw err; });
@@ -150,20 +148,17 @@ function receivedPostback(event) {
 							status: payload,
 							timestamp: timestamp
 						}
-						console.log('New user');
+
 						User.create(userItem);
 						sendLocationReply(senderID);
 					}
 				});
-				return;
 			break;
 		case 'NOT_ACTIVE':
 				sendTextMessage(senderID, 'Por el momento esta función no esta disponible');
-				return;
 			break;
 		default:
 			sendTextMessage(senderID, payload);
-			return;
 	}
 
 }
@@ -214,8 +209,8 @@ function sendWelcomeMessage(recipientId) {
 }
 
 function sendGraitudeMessage(recipientId){
-	let gratitude = ['Es un gusto ayudarte 😄', 'Puedes compartirme con un amigo con este link https://goo.gl/r7WMVl', 'Esta es mi  página https://www.facebook.com/ecobotMX/']
-	sendTextMessage(senderID, gratitude[Math.floor(Math.random()*gratitude.length)]);
+	var gratitude = ['Es un gusto ayudarte 😄', 'Puedes compartirme con un amigo con este link https://goo.gl/r7WMVl', 'Esta es mi  página https://www.facebook.com/ecobotMX/']
+	sendTextMessage(recipientId, gratitude[Math.floor(Math.random()*gratitude.length)]);
 }
 
 function sendApologizeMessage(recipientId) {
@@ -266,13 +261,13 @@ function sendLocationReply(recipientId) {
 }
 
 function sendTyping(event, enable) {
-	var senderID = event.sender.id;
   var messageData = {
     recipient: {
-      id: senderID
+      id: event.sender.id
     },
     sender_action: ( enable ) ? 'typing_on' : 'typing_off'
   };
+
   messagerApi.sendMessage(messageData);
 }
 
@@ -335,7 +330,7 @@ function sendList(recipientId, locations, coords){
 	moreButton.payload = JSON.stringify(morePayload);
 	messageData.message.attachment.payload.buttons.push(moreButton);
 
-	messagerApi.sendMessage(messageData);
+  messagerApi.sendMessage(messageData);
 }
 
 var distance = function(a,b){

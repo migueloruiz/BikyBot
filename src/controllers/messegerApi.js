@@ -1,7 +1,7 @@
 var request = require('request');
 
 module.exports = {
-	sendMessage: (messageData) => {
+	sendMessage: function(messageData) {
 	  request({
 	    uri: 'https://graph.facebook.com/v2.6/me/messages',
 	    qs: { access_token: process.env.PAGE_ACCES_TOKEN },
