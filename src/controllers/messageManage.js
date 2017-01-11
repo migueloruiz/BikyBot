@@ -82,7 +82,7 @@ function receivedMessage(event) {
 								}
 							})
 						}],
-						getNearStations: ['get_ecobici_access','get_bikeStationStatus', (results, cb) => {
+						getNearStations: (results, cb) => {
 						  //coordinates [ <longitude> , <latitude> ]
 						  var coords = [];
 						  coords[0] = location.long
@@ -100,14 +100,18 @@ function receivedMessage(event) {
 									return;
 								}
 								if(locationsData.length > 0){
-									sendList(senderID, locationsData, coords)
+									// sendList(senderID, locationsData, coords)
 									cb(null, locationsData);
 								}else{
-									sendTextMessage(senderID, 'Lo lamento no hay estaciones cerca de tu ubicación');
+									// sendTextMessage(senderID, 'Lo lamento no hay estaciones cerca de tu ubicación');
 									cb('Lo lamento no hay estaciones cerca de tu ubicacción', null);
 								}
 							})
-						}]
+						},
+						filterBikeStations: ['get_bikeStationStatus','getNearStations', (results, cb) => {
+							// results.get_bikeStationStatus
+							// results.getNearStations
+						}],
 					}, function(err, results) {
 							console.log(err)
 							if(err) throw err
