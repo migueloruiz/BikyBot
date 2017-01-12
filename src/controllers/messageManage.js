@@ -39,7 +39,7 @@ function receivedMessage(event) {
 			case 'gracias':
 			case 'Gracias':
 			case 'grax':
-				sendGraitudeMessage(recipientId);
+				sendGraitudeMessage(senderID);
 				return;
       default:
         sendApologizeMessage(senderID)
@@ -61,6 +61,32 @@ function receivedMessage(event) {
 					let location = attachment[0].payload.coordinates;
 
 					async.auto({
+						getNearStations: (cb) => {
+						  //coordinates [ <longitude> , <latitude> ]
+						  var coords = [];
+						  coords[0] = location.long
+						  coords[1] = location.lat
+							// var maxDistance = 2 //2 km   8/6371;
+
+						  BikeStation.find({
+						    loc: {
+						      $near: coords,
+						      // $maxDistance: maxDistance
+						    }
+						  }).limit(10).exec(function(err, locationsData) {
+						  	if (err){
+									console.log(err);
+									return;
+								}
+								if(locationsData.length > 0){
+									sendList(senderID, locationsData, coords)
+									cb(null, locationsData);
+								}else{
+									sendTextMessage(senderID, 'Lo lamento no hay estaciones cerca de tu ubicación');
+									cb('Lo lamento no hay estaciones cerca de tu ubicacción', null);
+								}
+							})
+						},
 				    get_ecobici_access: (cb) =>{
 							var url = `https://pubsbapi.smartbike.com/oauth/v2/token?client_id=${process.env.ECO_CLIENT_ID}&client_secret=${process.env.ECO_CLIENT_SECRET}&grant_type=client_credentials`
 							request(url, function (err, response, body) {
@@ -81,37 +107,7 @@ function receivedMessage(event) {
 									cb(null, data.stationsStatus);
 								}
 							})
-						}],
-						getNearStations: (results, cb) => {
-						  //coordinates [ <longitude> , <latitude> ]
-						  var coords = [];
-						  coords[0] = location.long
-						  coords[1] = location.lat
-							// var maxDistance = 2 //2 km   8/6371;
-
-						  BikeStation.find({
-						    loc: {
-						      $near: coords,
-						      // $maxDistance: maxDistance
-						    }
-						  }).limit(10).exec(function(err, locationsData) {
-						  	if (err){
-									console.log(err);
-									return;
-								}
-								if(locationsData.length > 0){
-									// sendList(senderID, locationsData, coords)
-									cb(null, locationsData);
-								}else{
-									// sendTextMessage(senderID, 'Lo lamento no hay estaciones cerca de tu ubicación');
-									cb('Lo lamento no hay estaciones cerca de tu ubicacción', null);
-								}
-							})
-						},
-						filterBikeStations: ['get_bikeStationStatus','getNearStations', (results, cb) => {
-							// results.get_bikeStationStatus
-							// results.getNearStations
-						}],
+						}]
 					}, function(err, results) {
 							console.log(err)
 							if(err) throw err
