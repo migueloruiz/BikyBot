@@ -39,7 +39,7 @@ function receivedMessage(event) {
 			case 'gracias':
 			case 'Gracias':
 			case 'grax':
-				sendGraitudeMessage(recipientId);
+				sendGraitudeMessage(senderID);
 				return;
       default:
         sendApologizeMessage(senderID)
@@ -61,28 +61,7 @@ function receivedMessage(event) {
 					let location = attachment[0].payload.coordinates;
 
 					async.auto({
-				    get_ecobici_access: (cb) =>{
-							var url = `https://pubsbapi.smartbike.com/oauth/v2/token?client_id=${process.env.ECO_CLIENT_ID}&client_secret=${process.env.ECO_CLIENT_SECRET}&grant_type=client_credentials`
-							request(url, function (err, response, body) {
-								if (err) throw err
-								if (!err && response.statusCode == 200) {
-									var data = JSON.parse(body);
-									cb(null, data.access_token);
-								}
-							})
-				    },
-						get_bikeStationStatus: ['get_ecobici_access', (results, cb) => {
-
-							var url = `https://pubsbapi.smartbike.com/api/v1/stations/status.json?access_token=${results.get_ecobici_access}`
-							request(url, function (err, response, body) {
-								if (err) throw err
-								if (!err && response.statusCode == 200) {
-									var data = JSON.parse(body);
-									cb(null, data.stationsStatus);
-								}
-							})
-						}],
-						getNearStations: ['get_ecobici_access','get_bikeStationStatus', (results, cb) => {
+						getNearStations: (cb) => {
 						  //coordinates [ <longitude> , <latitude> ]
 						  var coords = [];
 						  coords[0] = location.long
@@ -105,6 +84,27 @@ function receivedMessage(event) {
 								}else{
 									sendTextMessage(senderID, 'Lo lamento no hay estaciones cerca de tu ubicación');
 									cb('Lo lamento no hay estaciones cerca de tu ubicacción', null);
+								}
+							})
+						},
+				    get_ecobici_access: (cb) =>{
+							var url = `https://pubsbapi.smartbike.com/oauth/v2/token?client_id=${process.env.ECO_CLIENT_ID}&client_secret=${process.env.ECO_CLIENT_SECRET}&grant_type=client_credentials`
+							request(url, function (err, response, body) {
+								if (err) throw err
+								if (!err && response.statusCode == 200) {
+									var data = JSON.parse(body);
+									cb(null, data.access_token);
+								}
+							})
+				    },
+						get_bikeStationStatus: ['get_ecobici_access', (results, cb) => {
+
+							var url = `https://pubsbapi.smartbike.com/api/v1/stations/status.json?access_token=${results.get_ecobici_access}`
+							request(url, function (err, response, body) {
+								if (err) throw err
+								if (!err && response.statusCode == 200) {
+									var data = JSON.parse(body);
+									cb(null, data.stationsStatus);
 								}
 							})
 						}]
