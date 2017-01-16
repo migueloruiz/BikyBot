@@ -58,14 +58,14 @@ function receivedMessage(event) {
 
 				if( data.length > 0 ){
 					let status = data[0].status;
-					let location = attachment[0].payload.coordinates;
+
+					//coordinates [ <longitude> , <latitude> ]
+					let coords = [];
+					coords[0] = attachment[0].payload.coordinates.long;
+					coords[1] = attachment[0].payload.coordinates.lat;
 
 					async.auto({
 						getNearStations: (cb) => {
-						  //coordinates [ <longitude> , <latitude> ]
-						  var coords = [];
-						  coords[0] = location.long
-						  coords[1] = location.lat
 							// var maxDistance = 2 //2 km   8/6371;
 
 						  BikeStation.find({
@@ -79,7 +79,6 @@ function receivedMessage(event) {
 									return;
 								}
 								if(locationsData.length > 0){
-									sendList(senderID, locationsData, coords)
 									cb(null, locationsData);
 								}else{
 									sendTextMessage(senderID, 'Lo lamento no hay estaciones cerca de tu ubicación');
@@ -107,6 +106,23 @@ function receivedMessage(event) {
 									cb(null, data.stationsStatus);
 								}
 							})
+						}],
+						filterStatios: ['get_bikeStationStatus','getNearStations', (results, cb) => {
+
+							var stationFiltered = [];
+							for (var i = 0; i < results.get_bikeStationStatus.length; i++) {
+								for (var j = 0; j < results.getNearStations.length; j++) {
+									if(results.getNearStations[j].ecobici_id == results.get_bikeStationStatus[i].id){
+										var item = JSON.parse(JSON.stringify(results.getNearStations[j]));
+										item.availability = results.get_bikeStationStatus[i].availability
+										item.distance = distance(item.loc, coords);
+										stationFiltered.push(item)
+									}
+								}
+							}
+
+							sendList(senderID, stationFiltered , coords, 'GET_BIKE')
+
 						}]
 					}, function(err, results) {
 							console.log(err)
@@ -271,7 +287,13 @@ function sendTyping(event, enable) {
   messagerApi.sendMessage(messageData);
 }
 
-function sendList(recipientId, locations, coords){
+function sendList(recipientId, locations, coords, type){
+
+	degug(type)
+
+	let stationFiltered = locations.sort(function(a, b) {
+		return a.distance - b.distance
+	})
 
 	var messageData = {
 		  recipient:{
@@ -281,26 +303,25 @@ function sendList(recipientId, locations, coords){
 		    attachment: {
 		        type: 'template',
 		        payload: {
-		            template_type: 'list',
-                top_element_style: 'large',
-		            elements: [
-		                {
-		                    title: 'Estaciones más cercanas',
-												//image_url:'https://maps.googleapis.com/maps/api/staticmap?center=Brooklyn+Bridge,New+York,NY&zoom=13&size=600x300&maptype=roadmap&markers=color:blue%7Clabel:S%7C40.702147,-74.015794&markers=color:green%7Clabel:G%7C40.711614,-74.012318&markers=color:red%7Clabel:C%7C40.718217,-73.998284',
-		                    image_url: process.env.SERVER_URL + '/assets/images/fondo.jpg',
-		                    subtitle: 'Aquí hay lugares disponibles'
-		                }
-		            ],
-		            buttons: []
+	            template_type: 'list',
+              top_element_style: 'large',
+	            elements: [
+	                {
+                    title: 'Estaciones más cercanas',
+										//image_url:'https://maps.googleapis.com/maps/api/staticmap?center=Brooklyn+Bridge,New+York,NY&zoom=13&size=600x300&maptype=roadmap&markers=color:blue%7Clabel:S%7C40.702147,-74.015794&markers=color:green%7Clabel:G%7C40.711614,-74.012318&markers=color:red%7Clabel:C%7C40.718217,-73.998284',
+                    image_url: process.env.SERVER_URL + '/assets/images/fondo.jpg',
+                    subtitle: 'Aquí hay lugares disponibles'
+	                }
+	            ],
+	            buttons: []
 		        }
 		    }
 		}
 	}
 
-	var morePayload = {
-		long: coords[0],
-		lat: coords[1],
-		stationsSeen: []
+	let morePayload = {
+		cords: coords,
+		stationsLeft: []
 	}
 
 	var moreButton = {
@@ -311,7 +332,7 @@ function sendList(recipientId, locations, coords){
 
 	for (var i = 0; i < 3; i++) {
 		morePayload.stationsSeen.push(locations[i].ecobici_id);
-		let distanceText = `5 🚲 - ${distance(locations[i].loc,coords)} km`
+		let distanceText = `${locations[i].availability['bikes']} 🚲 - ${locations[i].distance.toFixed(1)} km`
 		let elementInList = {
 			title: locations[i].name,
 			image_url: `https:\/\/maps.googleapis.com\/maps\/api\/staticmap?size=200x200&scale=2&center=${locations[i].loc[1]},${locations[i].loc[0]}&zoom=16&markers=${locations[i].loc[1]},${locations[i].loc[0]}`,
@@ -353,7 +374,8 @@ var distance = function(a,b){
     var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
     var d = R * c;
-    return d.toFixed(1);
+		return d;
+    // return d.toFixed(1);
 }
 
 var toRad = function(Value) {
