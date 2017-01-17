@@ -3,7 +3,7 @@ html
 	head
 		meta(name='viewport', content='initial-scale=1.0, user-scalable=no')
 		meta(charset='utf-8')
-		title Simple markers
+		title Ruta más rapida
 		style.
 			html, body {
 				height: 100%;
@@ -12,6 +12,9 @@ html
 			}
 			#map {
 				height: 100%;
+			}
+			.gm-style-mtc {
+			  display: none;
 			}
 		body
 			#map
@@ -24,6 +27,7 @@ html
 					var mapOptions = {
 						center: new google.maps.LatLng(markers[0].lat, markers[0].lng),
 						zoom: 10,
+						disableDefaultUI: false,
 						mapTypeId: google.maps.MapTypeId.ROADMAP
 					};
 

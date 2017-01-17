@@ -5,9 +5,11 @@ var User = mongoose.model('User')
 var path = require('path')
 var messagerApi = require(path.join(__dirname, 'messegerApi'))
 var request = require('request');
+var JSON = require('json-strictify');
 
 module.exports = {
 	processMessage: function ( messageData ) {
+		console.log(messageData)
 		messageData.entry.forEach(function(pageEntry) {
 			pageEntry.messaging.forEach(function(messagingEvent) {
 				sendTyping(messagingEvent, true)
@@ -57,7 +59,7 @@ function receivedMessage(event) {
 				if (err) throw err;
 
 				if( data.length > 0 ){
-					let status = data[0].status;
+					let userStatus = data[0].status;
 
 					//coordinates [ <longitude> , <latitude> ]
 					let coords = [];
@@ -110,24 +112,27 @@ function receivedMessage(event) {
 						filterStatios: ['get_bikeStationStatus','getNearStations', (results, cb) => {
 
 							var stationFiltered = [];
-							for (var i = 0; i < results.get_bikeStationStatus.length; i++) {
-								for (var j = 0; j < results.getNearStations.length; j++) {
+							for (let i = 0; i < results.get_bikeStationStatus.length; i++) {
+								for (let j = 0; j < results.getNearStations.length; j++) {
 									if(results.getNearStations[j].ecobici_id == results.get_bikeStationStatus[i].id){
-										var item = JSON.parse(JSON.stringify(results.getNearStations[j]));
-										item.availability = results.get_bikeStationStatus[i].availability
-										item.distance = distance(item.loc, coords);
+										let item = cleanStation( results.getNearStations[j], results.get_bikeStationStatus[i].availability , coords, userStatus )
 										stationFiltered.push(item)
 									}
 								}
 							}
 
-							sendList(senderID, stationFiltered , coords, 'GET_BIKE')
+							sendStations(senderID, stationFiltered , coords)
 
 						}]
 					}, function(err, results) {
 							console.log(err)
 							if(err) throw err
 							User.remove(function(err) { if (err) throw err;});
+							User.update({sender_id: senderID}, {
+								status: 'RESOLVED',
+							}, function(err, numberAffected, rawResponse) {
+								console.log('Error')
+							})
 					});
 				}
 			});
@@ -135,9 +140,9 @@ function receivedMessage(event) {
 	}
 }
 
-function receivedAttachment(event){
-
-}
+// function receivedAttachment(event){
+//
+// }
 
 function receivedPostback(event) {
   var senderID = event.sender.id;
@@ -157,7 +162,6 @@ function receivedPostback(event) {
 					if( data.length > 0 ){
 						data[0].status = payload;
 						data[0].save(function(err) { if (err) throw err; });
-						sendLocationReply(senderID);
 					}else{
 						let userItem = {
 							sender_id: senderID,
@@ -166,15 +170,13 @@ function receivedPostback(event) {
 						}
 
 						User.create(userItem);
-						sendLocationReply(senderID);
 					}
+
+					sendLocationReply(senderID);
 				});
 			break;
-		case 'NOT_ACTIVE':
-				sendTextMessage(senderID, 'Por el momento esta función no esta disponible');
-			break;
 		default:
-			sendTextMessage(senderID, payload);
+			sendMoreStations(payload, senderID)
 	}
 
 }
@@ -287,9 +289,7 @@ function sendTyping(event, enable) {
   messagerApi.sendMessage(messageData);
 }
 
-function sendList(recipientId, locations, coords, type){
-
-	degug(type)
+function sendStations(recipientId, locations, coords){
 
 	let stationFiltered = locations.sort(function(a, b) {
 		return a.distance - b.distance
@@ -320,64 +320,99 @@ function sendList(recipientId, locations, coords, type){
 	}
 
 	let morePayload = {
-		cords: coords,
+		coords: coords,
 		stationsLeft: []
 	}
 
-	var moreButton = {
+	let moreButton = {
 			title: 'Ver más',
 			type: 'postback',
 			payload: ''
 	}
 
-	for (var i = 0; i < 3; i++) {
-		morePayload.stationsSeen.push(locations[i].ecobici_id);
-		let distanceText = `${locations[i].availability['bikes']} 🚲 - ${locations[i].distance.toFixed(1)} km`
-		let elementInList = {
-			title: locations[i].name,
-			image_url: `https:\/\/maps.googleapis.com\/maps\/api\/staticmap?size=200x200&scale=2&center=${locations[i].loc[1]},${locations[i].loc[0]}&zoom=16&markers=${locations[i].loc[1]},${locations[i].loc[0]}`,
-			// 19.4406926,-99.2047001
-			// https://maps.googleapis.com/maps/api/staticmap?size=100x100&scale=2&center=19.4406926,-99.2047001&zoom=15&markers=19.4406926,-99.2047001
-			subtitle: distanceText,
-			default_action: {
-					type: 'web_url',
-					url:
-					`${process.env.SERVER_URL}/map?user_lat=${locations[i].loc[1]}&user_long=${locations[i].loc[0]}&stat_lat=${coords[1]}&stat_long=${coords[0]}`,
-					messenger_extensions: true,
-					webview_height_ratio: 'tall',
-					fallback_url: `${process.env.SERVER_URL}/map?user_lat=${locations[i].loc[1]}&user_long=${locations[i].loc[0]}&stat_lat=${coords[1]}&stat_long=${coords[0]}`
-			}
+	for (let i = 0; i < stationFiltered.length; i++) {
+		if( i < 3 ){
+			let elementList = createListElement( stationFiltered[i] , coords )
+			messageData.message.attachment.payload.elements.push(elementList);
+		}else{
+			morePayload.stationsLeft.push(stationFiltered[i]);
 		}
-		messageData.message.attachment.payload.elements.push(elementInList);
 	}
 
 	moreButton.payload = JSON.stringify(morePayload);
-	messageData.message.attachment.payload.buttons.push(moreButton);
+
+	if( morePayload.stationsLeft.length > 3 )
+		messageData.message.attachment.payload.buttons.push(moreButton);
 
   messagerApi.sendMessage(messageData);
 }
 
-var distance = function(a,b){
-    var lat1 = a[1];
-    var lat2 = b[1];
-    var lon1 = a[0];
-    var lon2 = b[0];
-    var R = 6378;//6371000; // metres
-    var φ1 = toRad(lat1)
-    var φ2 = toRad(lat2)
-    var Δφ = toRad(lat2-lat1)
-    var Δλ = toRad(lon2-lon1)
-
-    var a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-        Math.cos(φ1) * Math.cos(φ2) *
-        Math.sin(Δλ/2) * Math.sin(Δλ/2);
-    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-
-    var d = R * c;
-		return d;
-    // return d.toFixed(1);
+function sendMoreStations(payload, recipientId) {
+	let data = JSON.parse(payload)
+	console.log(data)
+	console.log(data.coords)
+	sendStations(recipientId, data.stationsLeft, data.coords)
 }
 
-var toRad = function(Value) {
-    return Value * Math.PI / 180;
+function createListElement( station , userLoc ){
+
+	let availabilityText = ( station.bikes != undefined  ) ? `${station['bikes']} 🚲` : `${station['slots']} 🏁`
+
+	let distanceText = `${availabilityText} - ${parseFloat(station.distance).toFixed(1)} km`
+
+	let mapUrl = `${process.env.SERVER_URL}/map?user_lat=${userLoc[1]}&user_long=${userLoc[0]}&stat_lat=${station.lat}&stat_long=${station.long}`
+
+	let imageMap = `https:\/\/maps.googleapis.com\/maps\/api\/staticmap?size=200x200&scale=2&center=${station.lat},${station.long}&zoom=16&markers=${station.lat},${station.long}`
+
+	return {
+		title: station.name,
+		image_url: imageMap,
+		subtitle: distanceText,
+		default_action: {
+				type: 'web_url',
+				url:mapUrl,
+				messenger_extensions: true,
+				webview_height_ratio: 'tall',
+				fallback_url: mapUrl
+		}
+	}
+}
+
+function cleanStation( station, availability , coords, status){
+	let cleanElement = cloneObjet( station )
+	let parameter = ( status == 'GET_BIKE') ? 'bikes' : 'slots'
+	cleanElement[parameter] = availability[parameter]
+	cleanElement.distance = distance(cleanElement.loc, coords);
+	cleanElement.long = cleanElement.loc[0]
+	cleanElement.lat = cleanElement.loc[1]
+	delete cleanElement['_id'];
+	delete cleanElement['ecobici_id'];
+	delete cleanElement['address'];
+	delete cleanElement['type'];
+	delete cleanElement['__v'];
+	delete cleanElement['loc'];
+	return cleanElement;
+}
+
+function distance(a,b){
+    const R = 6378 //6371000; // metros
+    let φ1 = toRad( a[1] )
+    let φ2 = toRad( b[1] )
+    let Δφ = toRad( b[1] - a[1] )
+    let Δλ = toRad( b[0] - a[0] )
+
+    let x = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+        Math.cos(φ1) * Math.cos(φ2) *
+        Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    let y = 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
+
+    return ( R * y ).toFixed(3);
+}
+
+function toRad(value) {
+    return value * Math.PI / 180;
+}
+
+function cloneObjet( obj ){
+	return JSON.parse(JSON.stringify(obj));
 }
