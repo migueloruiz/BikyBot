@@ -5,7 +5,6 @@ var User = mongoose.model('User')
 var path = require('path')
 var messagerApi = require(path.join(__dirname, 'messegerApi'))
 var request = require('request');
-var JSON = require('json-strictify');
 
 module.exports = {
 	processMessage: function ( messageData ) {
