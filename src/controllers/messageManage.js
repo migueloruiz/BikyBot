@@ -1,4 +1,4 @@
-var async = require('async')
+var async = require('async');
 var mongoose = require('mongoose');
 var BikeStation = mongoose.model('BikeStation');
 var User = mongoose.model('User')
@@ -8,29 +8,30 @@ var request = require('request');
 
 module.exports = {
 	processMessage: function ( messageData ) {
-		console.log(messageData)
 		messageData.entry.forEach(function(pageEntry) {
 			pageEntry.messaging.forEach(function(messagingEvent) {
+
+				// Revisar que coincida con mi pagina
+				console.log('messagingEvent', messagingEvent )
+
+				// Buscar usuario y estado
+				// Crear usuario
+
 				sendTyping(messagingEvent, true)
+
 				if (messagingEvent.message) receivedMessage(messagingEvent);
 				if (messagingEvent.postback) receivedPostback(messagingEvent);
+
 			});
 		});
 	}
 }
 
 function receivedMessage(event) {
-  var senderID = event.sender.id;
-  var message = event.message;
-
-	// let quick_reply = message.quick_reply;
-  // if (quick_reply) {
-  //   var quickReplyPayload = quick_reply.payload;
-  //   sendTextMessage(senderID, 'Quick reply tapped');
-  //   return;
-  // }
-
+  let senderID = event.sender.id;
+  let message = event.message;
 	let text = message.text
+
   if (text) {
     switch (text) {
 			case 'hola':
@@ -43,110 +44,127 @@ function receivedMessage(event) {
 				sendGraitudeMessage(senderID);
 				return;
       default:
-        sendApologizeMessage(senderID)
+				// guardar todas las palablas no conocidas
+        sendApologizeMessage(senderID);
 				return;
     }
   }
 
-	if(message.attachments){
-		let attachment = message.attachments.filter((item)=>{
-			return item.type == 'location'
-		});
+	if(message.attachments)
+		receivedAttachment(senderID, message.attachments);
 
-		if( attachment.length > 0 ){
-			User.find({ sender_id: senderID }, function(err, data) {
-				if (err) throw err;
-
-				if( data.length > 0 ){
-					let userStatus = data[0].status;
-
-					//coordinates [ <longitude> , <latitude> ]
-					let coords = [];
-					coords[0] = attachment[0].payload.coordinates.long;
-					coords[1] = attachment[0].payload.coordinates.lat;
-
-					async.auto({
-						getNearStations: (cb) => {
-							// var maxDistance = 2 //2 km   8/6371;
-
-						  BikeStation.find({
-						    loc: {
-						      $near: coords,
-						      // $maxDistance: maxDistance
-						    }
-						  }).limit(10).exec(function(err, locationsData) {
-						  	if (err){
-									console.log(err);
-									return;
-								}
-								if(locationsData.length > 0){
-									cb(null, locationsData);
-								}else{
-									sendTextMessage(senderID, 'Lo lamento no hay estaciones cerca de tu ubicación');
-									cb('Lo lamento no hay estaciones cerca de tu ubicacción', null);
-								}
-							})
-						},
-				    get_ecobici_access: (cb) =>{
-							var url = `https://pubsbapi.smartbike.com/oauth/v2/token?client_id=${process.env.ECO_CLIENT_ID}&client_secret=${process.env.ECO_CLIENT_SECRET}&grant_type=client_credentials`
-							request(url, function (err, response, body) {
-								if (err) throw err
-								if (!err && response.statusCode == 200) {
-									var data = JSON.parse(body);
-									cb(null, data.access_token);
-								}
-							})
-				    },
-						get_bikeStationStatus: ['get_ecobici_access', (results, cb) => {
-
-							var url = `https://pubsbapi.smartbike.com/api/v1/stations/status.json?access_token=${results.get_ecobici_access}`
-							request(url, function (err, response, body) {
-								if (err) throw err
-								if (!err && response.statusCode == 200) {
-									var data = JSON.parse(body);
-									cb(null, data.stationsStatus);
-								}
-							})
-						}],
-						filterStatios: ['get_bikeStationStatus','getNearStations', (results, cb) => {
-
-							var stationFiltered = [];
-							for (let i = 0; i < results.get_bikeStationStatus.length; i++) {
-								for (let j = 0; j < results.getNearStations.length; j++) {
-									if(results.getNearStations[j].ecobici_id == results.get_bikeStationStatus[i].id){
-										let item = cleanStation( results.getNearStations[j], results.get_bikeStationStatus[i].availability , coords, userStatus )
-										stationFiltered.push(item)
-									}
-								}
-							}
-
-							sendStations(senderID, stationFiltered , coords)
-
-						}]
-					}, function(err, results) {
-							console.log(err)
-							if(err) throw err
-							User.remove(function(err) { if (err) throw err;});
-							User.update({sender_id: senderID}, {
-								status: 'RESOLVED',
-							}, function(err, numberAffected, rawResponse) {
-								console.log('Error')
-							})
-					});
-				}
-			});
-		}
-	}
 }
 
-// function receivedAttachment(event){
-//
-// }
+function receivedAttachment( senderID, attachments ){
+
+		let userLocation = getUserLocation( attachments );
+
+		if( userLocation == null ) return;
+
+		// MODER BUSQUEDA DE USUSRIO PARA OTRO LADO
+		// MODER BUSQUEDA DE USUSRIO PARA OTRO LADO
+		// MODER BUSQUEDA DE USUSRIO PARA OTRO LADO
+		// MODER BUSQUEDA DE USUSRIO PARA OTRO LADO
+
+		User.find({ sender_id: senderID }, function(err, data) {
+			if (err) throw err;
+
+			if( data.length > 0 ){
+				let userStatus = data[0].status;
+
+				async.auto({
+					getNearStations: (cb) => {
+						// var maxDistance = 2 //2 km   8/6371;
+
+						BikeStation.find({
+							loc: {
+								$near: userLocation,
+								// $maxDistance: maxDistance
+							}
+						}).limit(10).exec(function(err, locationsData) {
+							if (err){
+								console.log(err);
+								return;
+							}
+							if(locationsData.length > 0){
+								cb(null, locationsData);
+							}else{
+								sendTextMessage(senderID, 'Lo lamento no hay estaciones cerca de tu ubicación');
+								cb('Lo lamento no hay estaciones cerca de tu ubicacción', null);
+							}
+						})
+					},
+					get_ecobici_access: (cb) =>{
+						let url = `https://pubsbapi.smartbike.com/oauth/v2/token?client_id=${process.env.ECO_CLIENT_ID}&client_secret=${process.env.ECO_CLIENT_SECRET}&grant_type=client_credentials`
+						request(url, function (err, response, body) {
+							if (err) throw err
+							cb(null, JSON.parse(body).access_token);
+						})
+					},
+					get_bikeStationStatus: ['get_ecobici_access', (results, cb) => {
+
+						let url = `https://pubsbapi.smartbike.com/api/v1/stations/status.json?access_token=${results.get_ecobici_access}`
+						request(url, function (err, response, body) {
+							if (err) throw err
+							cb(null, JSON.parse(body).stationsStatus);
+						})
+					}],
+					filterStatios: ['get_bikeStationStatus','getNearStations', (results, cb) => {
+
+						let stationFiltered = [];
+						for (let i = 0; i < results.get_bikeStationStatus.length; i++) {
+							for (let j = 0; j < results.getNearStations.length; j++) {
+								if(results.getNearStations[j].ecobici_id == results.get_bikeStationStatus[i].id){
+
+									let item = cleanStation( results.getNearStations[j], results.get_bikeStationStatus[i].availability , userLocation, userStatus )
+
+									// cleanStation gregresa objetos null si no satisfacen el status del usuario
+									if(item != null) stationFiltered.push(item)
+
+									// se eliminan del arrego aquellos elemnetos ya encontrados para reducir tiempo en el siguiente loop
+									let index = results.getNearStations.indexOf(results.getNearStations[j])
+									if (index > -1) results.getNearStations.splice(index, 1)
+
+									// se forza a terminar el ciclo for para reducir tiempo en el siguiente loop
+									j = results.getNearStations.length + 1
+								}
+							}
+						}
+						sendStations(senderID, stationFiltered , userLocation)
+
+					}]
+				}, function(err, results) {
+						console.log(err)
+						if(err) throw err
+						User.remove(function(err) { if (err) throw err;});
+						User.update({sender_id: senderID}, {
+							status: 'RESOLVED',
+						}, function(err, numberAffected, rawResponse) {
+							console.log('Error')
+						})
+				});
+			}
+		});
+
+}
+
+function getUserLocation( attachments ){
+	let userLocation = attachments.filter((item)=>{
+		return item.type == 'location'
+	}).map((item)=>{
+		let coords = []; //coordinates [ <longitude> , <latitude> ]
+		coords[0] = item.payload.coordinates.long;
+		coords[1] = item.payload.coordinates.lat;
+		return coords;
+	});
+
+	return ( userLocation.length > 0 ) ? userLocation[0] : null
+}
 
 function receivedPostback(event) {
-  var senderID = event.sender.id;
-	var payload = event.postback.payload;
-	var timestamp = event.timestamp;
+  let senderID = event.sender.id;
+	let payload = event.postback.payload;
+	let timestamp = event.timestamp;
 
 	switch (payload) {
 		case 'START':
@@ -182,7 +200,7 @@ function receivedPostback(event) {
 
 
 function sendTextMessage(recipientId, messageText) {
-  var messageData = {
+  let messageData = {
     recipient: {
       id: recipientId
     },
@@ -197,7 +215,7 @@ function sendTextMessage(recipientId, messageText) {
 
 function sendWelcomeMessage(recipientId) {
 
-  var messageData = {
+  let messageData = {
     recipient: {
       id: recipientId
     },
@@ -226,13 +244,13 @@ function sendWelcomeMessage(recipientId) {
 }
 
 function sendGraitudeMessage(recipientId){
-	var gratitude = ['Es un gusto ayudarte 😄', 'Puedes compartirme con un amigo con este link https://goo.gl/r7WMVl', 'Esta es mi  página https://www.facebook.com/ecobotMX/']
+	let gratitude = ['Es un gusto ayudarte 😄', 'Puedes compartirme con un amigo con este link https://goo.gl/r7WMVl', 'Esta es mi  página https://www.facebook.com/ecobotMX/']
 	sendTextMessage(recipientId, gratitude[Math.floor(Math.random()*gratitude.length)]);
 }
 
 function sendApologizeMessage(recipientId) {
 
-  var messageData = {
+  let messageData = {
     recipient: {
       id: recipientId
     },
@@ -264,7 +282,7 @@ function sendLocationReply(recipientId) {
 	let qArray = ['¿Cuál es tu ubicación?', '¿Dónde estás? 📍', '¿Por dónde estas?', '¿Me conpartes tu ubicación?']
 	let text = qArray[ Math.floor(Math.random()*qArray.length) ]
 
-  var messageData = {
+  let messageData = {
     recipient: {
       id: recipientId
     },
@@ -278,7 +296,7 @@ function sendLocationReply(recipientId) {
 }
 
 function sendTyping(event, enable) {
-  var messageData = {
+  let messageData = {
     recipient: {
       id: event.sender.id
     },
@@ -294,7 +312,7 @@ function sendStations(recipientId, locations, coords){
 		return a.distance - b.distance
 	})
 
-	var messageData = {
+	let messageData = {
 		  recipient:{
 		    id :recipientId
 		  },
@@ -340,7 +358,7 @@ function sendStations(recipientId, locations, coords){
 
 	moreButton.payload = JSON.stringify(morePayload);
 
-	if( morePayload.stationsLeft.length > 3 )
+	if( morePayload.stationsLeft.length > 2 )
 		messageData.message.attachment.payload.buttons.push(moreButton);
 
   messagerApi.sendMessage(messageData);
@@ -378,8 +396,12 @@ function createListElement( station , userLoc ){
 }
 
 function cleanStation( station, availability , coords, status){
-	let cleanElement = cloneObjet( station )
+
 	let parameter = ( status == 'GET_BIKE') ? 'bikes' : 'slots'
+
+	if( availability[parameter] == 0 ) return null
+
+	let cleanElement = cloneObjet( station )
 	cleanElement[parameter] = availability[parameter]
 	cleanElement.distance = distance(cleanElement.loc, coords);
 	cleanElement.long = cleanElement.loc[0]
