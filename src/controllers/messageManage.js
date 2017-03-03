@@ -1,3 +1,4 @@
+
 var async = require('async')
 var mongoose = require('mongoose')
 var BikeStation = mongoose.model('BikeStation')
@@ -12,30 +13,24 @@ var ecobiciClient = new Ecobici({
 })
 
 module.exports = {
-  processMessage: function (messageData) {
-    console.log(messageData)
-    messageData.entry.forEach(function (pageEntry) {
-      pageEntry.messaging.forEach(function (messagingEvent) {
-        sendTyping(messagingEvent, true)
-        if (messagingEvent.message) receivedMessage(messagingEvent)
-        if (messagingEvent.postback) receivedPostback(messagingEvent)
-      })
-    })
-  }
+	processMessage: function ( messageData ) {
+		messageData.entry.forEach(function(pageEntry) {
+			pageEntry.messaging.forEach(function(messagingEvent) {
+
+				// TODO: Revisar que coincida con la pagina
+				console.log('messagingEvent', messagingEvent )
+				sendTyping(messagingEvent, true)
+				if (messagingEvent.message) receivedMessage(messagingEvent);
+				if (messagingEvent.postback) receivedPostback(messagingEvent);
+			});
+		});
+	}
 }
 
-function receivedMessage (event) {
-  var senderID = event.sender.id
-  var message = event.message
-
-  // let quick_reply = message.quick_reply;
-  // if (quick_reply) {
-  //   var quickReplyPayload = quick_reply.payload;
-  //   sendTextMessage(senderID, 'Quick reply tapped');
-  //   return;
-  // }
-
-  let text = message.text
+function receivedMessage(event) {
+  let senderID = event.sender.id;
+  let message = event.message;
+	let text = message.text
   if (text) {
     switch (text) {
       case 'hola':
@@ -48,6 +43,7 @@ function receivedMessage (event) {
         sendGraitudeMessage(senderID)
         return
       default:
+        //TODO: guardar todas las palablas no conocidas
         sendApologizeMessage(senderID)
         return
     }
@@ -257,7 +253,7 @@ function sendLocationReply (recipientId) {
   let qArray = ['¿Cuál es tu ubicación?', '¿Dónde estás? 📍', '¿Por dónde estas?', '¿Me conpartes tu ubicación?']
   let text = qArray[ Math.floor(Math.random() * qArray.length) ]
 
-  var messageData = {
+  let messageData = {
     recipient: {
       id: recipientId
     },

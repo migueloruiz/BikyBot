@@ -8,18 +8,14 @@ router.get('/', function (req, res) {
     console.log('Validating webhook')
     res.status(200).send(req.query['hub.challenge'])
   } else {
-    console.log()
     console.error('Failed validation. Make sure the validation tokens match.')
     res.sendStatus(403)
   }
 })
 
 router.post('/', function (req, res) {
-  console.log('Init ====================')
-  var data = req.body
-  messageManage.processMessage(data)
-  console.log('End =====================')
-  res.sendStatus(200)
-})
+	messageManage.processMessage(req.body);
+  res.sendStatus(200);
+});
 
 module.exports = router
