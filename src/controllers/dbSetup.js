@@ -21,7 +21,7 @@ module.exports = {
       set_db: ['get_bikeStations', (results, cb) => {
         mongoose.connect(process.env.DB_URL, function (err) {
           if (err) {
-            console.log('Error DB')
+            console.log('Error DB', err)
             throw err
           }
           BikeStation.remove(() => {
