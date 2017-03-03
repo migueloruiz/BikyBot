@@ -19,8 +19,7 @@ module.exports = {
         })
       },
       set_db: ['get_bikeStations', (results, cb) => {
-        console.log('dev', process.env.DB_URL)
-        mongoose.connect(process.env.DB_URL, function (err) {
+        mongoose.connect(encodeURIComponent(process.env.DB_URL), function (err) {
           if (err) {
             console.log('Error DB', err)
             throw err
