@@ -14,6 +14,7 @@
     "body-parser": "~1.15.2",
     "compression": "^1.6.2",
     "debug": "~2.2.0",
+    "ecobicimx": "^1.0.1",
     "envalid": "^2.4.2",
     "express": "^4.14.0",
     "moment": "^2.17.1",
@@ -24,12 +25,15 @@
   },
   "devDependencies": {
     "browser-sync": "^2.18.5",
+    "eslint": "^3.15.0",
+    "eslint-config-standard": "^6.2.1",
+    "eslint-plugin-promise": "^3.4.1",
+    "eslint-plugin-standard": "^2.0.1",
     "gulp": "^3.9.1",
     "gulp-node-inspector": "^0.1.0",
     "gulp-nodemon": "^2.2.1",
     "gulp-plumber": "^1.1.0",
     "gulp-standard": "^8.0.3",
-    "gulp-util": "^3.0.8",
-    "jshint": "^2.9.4"
+    "gulp-util": "^3.0.8"
   }
 }

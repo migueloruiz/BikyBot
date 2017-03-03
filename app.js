@@ -3,8 +3,6 @@
 var express = require('express')
 var path = require('path')
 var http = require('http')
-var request = require('request');
-var async = require('async')
 
 // Midlleware
 // ==========================
@@ -22,18 +20,18 @@ mongoose.Promise = require('bluebird')
 const envalid = require('envalid')
 const { str } = envalid
 console.log(`================= ${process.env.NODE_ENV} mode =================`)
-const env = envalid.cleanEnv(process.env, {
-	PROJECT: str(),
-	SERVER_URL: str(),
-	FB_APP_ID: str(),
-	FB_APP_SECRET: str(),
-	FB_PAGE_ID: str(),
-	PAGE_ACCES_TOKEN: str(),
-	VALIDATION_TOKEN: str(),
-	DB_URL: str(),
-	ECO_CLIENT_ID: str(),
-	ECO_CLIENT_SECRET: str(),
-	MAPS_KEY: str()
+envalid.cleanEnv(process.env, {
+  PROJECT: str(),
+  SERVER_URL: str(),
+  FB_APP_ID: str(),
+  FB_APP_SECRET: str(),
+  FB_PAGE_ID: str(),
+  PAGE_ACCES_TOKEN: str(),
+  VALIDATION_TOKEN: str(),
+  DB_URL: str(),
+  ECO_CLIENT_ID: str(),
+  ECO_CLIENT_SECRET: str(),
+  MAPS_KEY: str()
 })
 
 // Models
@@ -50,66 +48,8 @@ var webhook = require(path.join(__dirname, 'src/routes/webhook/webhook'))
 
 // Databease Setup
 // ==========================
-async.auto({
-  get_ecobici_access: (cb) =>{
-		var url = `https://pubsbapi.smartbike.com/oauth/v2/token?client_id=${process.env.ECO_CLIENT_ID}&client_secret=${process.env.ECO_CLIENT_SECRET}&grant_type=client_credentials`
-		request(url, function (err, response, body) {
-			if (err) throw err
-			if (!err && response.statusCode == 200) {
-				var data = JSON.parse(body);
-				cb(null, data.access_token);
-			}
-		})
-  },
-	get_bikeStations: ['get_ecobici_access', (results, cb) => {
-
-		var url = `https://pubsbapi.smartbike.com/api/v1/stations.json?access_token=${results.get_ecobici_access}`
-		request(url, function (err, response, body) {
-			if (err) throw err
-			if (!err && response.statusCode == 200) {
-				var data = JSON.parse(body);
-				cb(null, data.stations);
-			}
-		})
-	}],
-	set_db: ['get_ecobici_access','get_bikeStations', (results, cb) => {
-		mongoose.connect( process.env.DB_URL , function (err) {
-		  if (err) {
-				console.log('Error DB')
-				throw err
-			}
-
-		  BikeStation.remove(function() {
-		    async.each(results.get_bikeStations, function(item, cb) {
-
-					var station = {
-						ecobici_id: item.id,
-						name: sanitizeName( item.name ),
-						address: item.address,
-						type: item.stationType,
-						loc: [item.location.lon, item.location.lat]
-					}
-		      BikeStation.create(station, cb)
-		    }, function(err) {
-		      if (err) throw err
-		    })
-		  })
-		})
-
-	}]
-}, function(err, results) {
-		if(err)
-			throw err
-});
-
-function sanitizeName( str ){
-	if( str.charAt(0) == ' ' ) return str.slice(1)
-	if( parseInt(str.charAt(0)) != null ) return sanitizeName( str.slice(1).replace('-', ' y ').capitalize(true).replace(' Y ', ' y ') )
-}
-
-String.prototype.capitalize = function(lower) {
-  return (lower ? this.toLowerCase() : this).replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
-};
+var dbSetup = require(path.join(__dirname, 'src/controllers/dbSetup'))
+dbSetup.init()
 
 // Server Setup
 // ==========================
@@ -191,6 +131,6 @@ app.use(function (err, req, res, next) {
 // Start Listen Serve
 // ==========================
 app.listen(app.get('port'), function () {
-  console.log( process.env.PROJECT + ' on port', app.get('port'))
+  console.log(process.env.PROJECT + ' on port', app.get('port'))
 })
 module.exports = app
