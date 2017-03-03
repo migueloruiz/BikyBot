@@ -13,24 +13,23 @@ var ecobiciClient = new Ecobici({
 })
 
 module.exports = {
-	processMessage: function ( messageData ) {
-		messageData.entry.forEach(function(pageEntry) {
-			pageEntry.messaging.forEach(function(messagingEvent) {
-
-				// TODO: Revisar que coincida con la pagina
-				console.log('messagingEvent', messagingEvent )
-				sendTyping(messagingEvent, true)
-				if (messagingEvent.message) receivedMessage(messagingEvent);
-				if (messagingEvent.postback) receivedPostback(messagingEvent);
-			});
-		});
-	}
+  processMessage: function (messageData) {
+    messageData.entry.forEach(function (pageEntry) {
+      pageEntry.messaging.forEach(function (messagingEvent) {
+        // TODO: Revisar que coincida con la pagina
+        console.log('messagingEvent', messagingEvent)
+        sendTyping(messagingEvent, true)
+        if (messagingEvent.message) receivedMessage(messagingEvent)
+        if (messagingEvent.postback) receivedPostback(messagingEvent)
+      })
+    })
+  }
 }
 
-function receivedMessage(event) {
-  let senderID = event.sender.id;
-  let message = event.message;
-	let text = message.text
+function receivedMessage (event) {
+  let senderID = event.sender.id
+  let message = event.message
+  let text = message.text
   if (text) {
     switch (text) {
       case 'hola':
@@ -43,7 +42,7 @@ function receivedMessage(event) {
         sendGraitudeMessage(senderID)
         return
       default:
-        //TODO: guardar todas las palablas no conocidas
+        // TODO: guardar todas las palablas no conocidas
         sendApologizeMessage(senderID)
         return
     }

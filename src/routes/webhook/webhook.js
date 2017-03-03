@@ -14,8 +14,8 @@ router.get('/', function (req, res) {
 })
 
 router.post('/', function (req, res) {
-	messageManage.processMessage(req.body);
-  res.sendStatus(200);
-});
+  messageManage.processMessage(req.body)
+  res.sendStatus(200)
+})
 
 module.exports = router
