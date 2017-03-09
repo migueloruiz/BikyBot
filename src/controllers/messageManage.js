@@ -15,15 +15,22 @@ var ecobiciClient = new Ecobici({
 module.exports = {
   processMessage: function (messageData) {
     messageData.entry.forEach(function (pageEntry) {
+      if (!isPageIdValid(pageEntry)) {
+        console.warn(`Page ${pageEntry.id} try to send message`)
+        return
+      }
+
       pageEntry.messaging.forEach(function (messagingEvent) {
-        // TODO: Revisar que coincida con la pagina
-        console.log('messagingEvent', messagingEvent)
         sendTyping(messagingEvent, true)
         if (messagingEvent.message) receivedMessage(messagingEvent)
         if (messagingEvent.postback) receivedPostback(messagingEvent)
       })
     })
   }
+}
+
+function isPageIdValid (pageEntry) {
+  return pageEntry.id === process.env.FB_PAGE_ID
 }
 
 function receivedMessage (event) {
@@ -167,6 +174,9 @@ function receivedPostback (event) {
         sendLocationReply(senderID)
       })
       break
+    case 'SHARE':
+      sendShareWithFrends(senderID)
+      break
     default:
       sendMoreStations(payload, senderID)
   }
@@ -198,9 +208,9 @@ function sendWelcomeMessage (recipientId) {
           template_type: 'generic',
           elements: [
             {
-              title: '¡Hola!, ¿En qué podemos ayudarte?',
-              subtitle: 'Te ayudo en tu recorrido diario.',
-              image_url: 'https://baconmockup.com/300/200',
+              title: 'Hola soy BikeBot 🚲',
+              subtitle: 'Encuentra la ecobici mas cercana conmigo',
+              image_url: process.env.SERVER_URL + '/assets/images/bikibot_fondo.png',
               buttons: [
                 {type: 'postback', title: 'Buscar Bici', payload: 'GET_BIKE'},
                 {type: 'postback', title: 'Encontrar Espacio', payload: 'GET_SLOT'}
@@ -234,7 +244,7 @@ function sendApologizeMessage (recipientId) {
             {
               title: '¡Aún no soy tan listo! 😅',
               subtitle: 'Por el momento te puedo ayudar con estas tareas 💪',
-              image_url: 'https://baconmockup.com/300/200',
+              image_url: process.env.SERVER_URL + '/assets/images/bikibot_fondo.png',
               buttons: [
                 {type: 'postback', title: 'Encontrar 🚲', payload: 'GET_BIKE'},
                 {type: 'postback', title: 'Encontrar 🅿️', payload: 'GET_SLOT'}
@@ -263,6 +273,37 @@ function sendLocationReply (recipientId) {
   }
 
   messagerApi.sendMessage(messageData)
+}
+
+function sendShareWithFrends (recipientId) {
+  messagerApi.sendMessage({
+    recipient: {
+      id: recipientId
+    },
+    message: {
+      attachment: {
+        type: 'template',
+        payload: {
+          template_type: 'generic',
+          elements: [
+            {
+              title: 'Hola soy BikeBot 🚲',
+              subtitle: 'Encuentra la ecobici mas cercana conmigo',
+              image_url: process.env.SERVER_URL + '/assets/images/bikibot_fondo.png',
+              buttons: [
+                // { type: 'element_share' },
+                {
+                  type: 'web_url',
+                  url: 'https://m.me/1085397894889504',
+                  title: 'Iniciar conversacion'
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  })
 }
 
 // TODO: momer esto a UI

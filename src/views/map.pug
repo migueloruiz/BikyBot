@@ -40,12 +40,22 @@ html
 						var markerData = markers[i]
 						var myLatlng = new google.maps.LatLng(markerData.lat, markerData.lng);
 						lat_lng.push(myLatlng);
-						var marker = new google.maps.Marker({
+
+						let markerOptions = {
 							position: myLatlng,
 							map: map,
-							title: markerData.title,
-							icon: markerData.icon
-						});
+							title: markerData.title
+						}
+
+						if (markerData.icon !== '/assets/images/user_marker.png') {
+							var myIcon = new google.maps.MarkerImage(markerData.icon, null, null, null, new google.maps.Size(80,80));
+							markerOptions.icon = myIcon
+						} else {
+							var myIcon = new google.maps.MarkerImage(markerData.icon, null, null, null, new google.maps.Size(58,40));
+							markerOptions.icon = myIcon
+						}
+
+						var marker = new google.maps.Marker(markerOptions);
 						latlngbounds.extend(marker.position);
 					}
 
