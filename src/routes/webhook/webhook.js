@@ -3,6 +3,8 @@ var router = express.Router()
 var path = require('path')
 var messageManage = require(path.join(__dirname, '../../controllers/messageManage'))
 
+// Authorization request
+// ==========================
 router.get('/', function (req, res) {
   if (req.query['hub.mode'] === 'subscribe' && req.query['hub.verify_token'] === process.env.VALIDATION_TOKEN) {
     console.log('Validating webhook')
@@ -13,6 +15,9 @@ router.get('/', function (req, res) {
   }
 })
 
+
+// Process Messages
+// ==========================
 router.post('/', function (req, res) {
   messageManage.processMessage(req.body)
   res.sendStatus(200)

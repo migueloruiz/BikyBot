@@ -3,7 +3,8 @@ var Schema = mongoose.Schema
 
 var User = function () {
 	var UserSchema = new Schema({
-	  sender_id: { type: Number, required: true, unique: true },
+	  _id: { type: Number, required: true, unique: true },
+		name: String,
 		status: String,
 		timestamp: Date
 	})
