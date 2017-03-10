@@ -24,7 +24,6 @@ module.exports = {
       }
       // Procesamiento del mansaje
       pageEntry.messaging.forEach((messagingEvent) => {
-        console.log(messagingEvent)
         messagerApi.sendTyping(messagingEvent, true)
         if (messagingEvent.message) _processMessage(messagingEvent)
         if (messagingEvent.postback) _processPostback(messagingEvent)
