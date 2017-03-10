@@ -82,6 +82,7 @@ function _processPostback (event) {
 function _setUserRequest (senderID, postbackOption) {
 
   // TODO: Usar UPdate??????
+  // TODO: Diferencias users
   User.find({
     _id: senderID
   }, (err, data) => {
