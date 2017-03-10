@@ -37,10 +37,7 @@ envalid.cleanEnv(process.env, {
 // Models
 // ==========================
 var bikeStationModel = require(path.join(__dirname, 'src/models/bikeStation'))()
-
-
-// TODO: Cambiar modelo segun process.env.NODE_ENV
-var UserModel = require(path.join(__dirname, 'src/models/user'))()
+var UserModel = (process.env.NODE_ENV === 'production') ? require(path.join(__dirname, 'src/models/user'))() : require(path.join(__dirname, 'src/models/userDev'))()
 var BikeStation = mongoose.model('BikeStation')
 
 // Routes

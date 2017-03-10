@@ -27,7 +27,7 @@ module.exports = {
           BikeStation.remove(() => {
             async.each(results.get_bikeStations, function (item, cb) {
               var station = {
-                ecobici_id: item.id,
+                _id: item.id,
                 name: sanitizeName(item.name),
                 address: item.address,
                 type: item.stationType,

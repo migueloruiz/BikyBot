@@ -1,7 +1,7 @@
 var async = require('async')
 var mongoose = require('mongoose')
 var BikeStation = mongoose.model('BikeStation')
-var User = mongoose.model('User')
+var User = (process.env.NODE_ENV === 'production') ? mongoose.model('User') : mongoose.model('UserDev')
 var path = require('path')
 var messagerApi = require(path.join(__dirname, 'messegerApi'))
 var graphApi = require(path.join(__dirname, 'graphApi'))
@@ -81,57 +81,52 @@ function _processPostback (event) {
 
 function _setUserRequest (senderID, postbackOption) {
 
-  // TODO: Usar UPdate??????
-  // TODO: Diferencias users
-  User.find({
-    _id: senderID
-  }, (err, data) => {
-    if (err) throw err
+  let userName = ''
 
-    if (data.length > 0) {
-      data[0].status = postbackOption
-      data[0].timestamp = new Date().toISOString()
-      data[0].save((err) => {
-        if (err) throw err
-      })
-    } else {
-      graphApi.getUserDataByID(senderID).then((user) => {
-        let userData = {
-          _id: senderID,
-          name: user['first_name'],
-          status: postbackOption,
-          timestamp: new Date().toISOString()
-        }
-        User.create(userData)
-      }).catch((err) => {
-        User.create({
-          _id: senderID,
-          name: '',
-          status: postbackOption,
-          timestamp: new Date().toISOString()
+  User.findByIdAndUpdate(senderID,
+    { $set: {
+      status: postbackOption,
+      timestamp: new Date().toISOString()
+    }},(err, data) => {
+
+      if (data == null || err != null) {
+        graphApi.getUserDataByID(senderID).then((user) => {
+          userName = user['first_name']
+          let userData = {
+            _id: senderID,
+            name: user['first_name'],
+            status: postbackOption,
+            timestamp: new Date().toISOString()
+          }
+          User.create(userData)
+        }).catch((err) => {
+          userName = ''
+          User.create({
+            _id: senderID,
+            name: '',
+            status: postbackOption,
+            timestamp: new Date().toISOString()
+          })
         })
-      })
+      } else {
+        userName = data.name;
+      }
+
+      messagerApi.sendLocationReply(senderID, userName)
     }
-    // TODO: Pasarle el nombre y generar repustas mas humans
-    messagerApi.sendLocationReply(senderID)
-  })
+  )
 }
 
 function _getStationsForUser (senderID, coords) {
   async.auto({
     getUserInfo: (cb) => {
-      User.find({ sender_id: senderID }, function (err, data) {
-        if (err) throw cb('No se puede encontrar al usuario', null)
-
-        if (data.length > 0) {
-          // TODO: Estatus no valido
-          // TODO: Avisar de la locaciion expirada y pedir nuevamente
-          let userStatus = data[0].status
-          cb(null, {
-            userStatus: userStatus
-          })
-        } else {
+      User.findById(senderID , function (err, data) {
+        if (data == null || err != null) {
           cb(`Usuarion ${senderID} no encontrado`, null)
+        } else {
+          cb(null, {
+            userStatus: data.status
+          })
         }
       })
     },
@@ -146,13 +141,10 @@ function _getStationsForUser (senderID, coords) {
     },
     setStatusInDB: ['get_bikeStationStatus', (results, cb) => {
       results.get_bikeStationStatus.forEach((item) => {
-        // TODO: que pasa si hay in ID que no existe en la base de datos
-        BikeStation.update({
-          ecobici_id: item.id
-        }, {
+        BikeStation.findByIdAndUpdate(item.id, {
           bikes: item.availability.bikes,
           slots: item.availability.slots
-        }, function (err, raw) {
+        }, (err, data) => {
           if (err) console.log('error ', err)
         })
       })
@@ -170,7 +162,6 @@ function _getStationsForUser (senderID, coords) {
       let excluedes = {
         _id: 0,
         __v: 0,
-        ecobici_id: 0,
         type: 0,
         address: 0
       }
