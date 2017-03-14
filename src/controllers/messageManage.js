@@ -90,29 +90,30 @@ function _setUserRequest (senderID, postbackOption) {
     }}, (err, data) => {
       if (data == null || err != null) {
         graphApi.getUserDataByID(senderID).then((user) => {
-          userName = user['first_name']
-          let userData = {
-            _id: senderID,
-            name: user['first_name'],
-            status: postbackOption
-          }
-          User.create(userData)
+          createUser(senderID, postbackOption, user['first_name'])
         }).catch((err) => {
-          console.error(err)
-          userName = ''
-          User.create({
-            _id: senderID,
-            name: '',
-            status: postbackOption
-          })
+          createUser(senderID, postbackOption, '')
         })
       } else {
         userName = data.name
+        messagerApi.sendLocationReply(senderID, userName)
       }
-
-      messagerApi.sendLocationReply(senderID, userName)
     }
   )
+}
+
+function createUser(senderID, postbackOption, userName){
+  User.create({
+    _id: senderID,
+    name: '',
+    status: postbackOption
+  }, function (err, small) {
+    if (err) {
+      console.error(err)
+      messagerApi.sendTextMessage(senderID, err)
+    }
+     messagerApi.sendLocationReply(senderID, userName)
+  })
 }
 
 function _getStationsForUser (senderID, coords) {
