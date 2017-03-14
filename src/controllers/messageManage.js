@@ -94,8 +94,7 @@ function _setUserRequest (senderID, postbackOption) {
           let userData = {
             _id: senderID,
             name: user['first_name'],
-            status: postbackOption,
-            timestamp: new Date().toISOString()
+            status: postbackOption
           }
           User.create(userData)
         }).catch((err) => {
@@ -104,8 +103,7 @@ function _setUserRequest (senderID, postbackOption) {
           User.create({
             _id: senderID,
             name: '',
-            status: postbackOption,
-            timestamp: new Date().toISOString()
+            status: postbackOption
           })
         })
       } else {
