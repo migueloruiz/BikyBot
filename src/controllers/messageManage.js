@@ -105,7 +105,7 @@ function _setUserRequest (senderID, postbackOption) {
 function createUser(senderID, postbackOption, userName){
   User.create({
     _id: senderID,
-    name: '',
+    name: userName,
     status: postbackOption
   }, function (err, small) {
     if (err) {
