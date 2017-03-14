@@ -15,7 +15,6 @@ router.get('/', function (req, res) {
   }
 })
 
-
 // Process Messages
 // ==========================
 router.post('/', function (req, res) {

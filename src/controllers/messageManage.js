@@ -49,8 +49,8 @@ function _processMessage (event) {
     let attachment = message.attachments.filter((item) => {
       return item.type === 'location'
     })
-    if (attachment.length > 0){
-      let coords = [	// coordinates [ <longitude> , <latitude> ]
+    if (attachment.length > 0) {
+      let coords = [ // coordinates [ <longitude> , <latitude> ]
         attachment[0].payload.coordinates.long,
         attachment[0].payload.coordinates.lat
       ]
@@ -69,7 +69,7 @@ function _processPostback (event) {
       break
     case 'GET_SLOT':
     case 'GET_BIKE':
-      _setUserRequest (senderID, postbackOption)
+      _setUserRequest(senderID, postbackOption)
       break
     case 'SHARE':
       messagerApi.sendShareWithFrends(senderID)
@@ -81,15 +81,13 @@ function _processPostback (event) {
 }
 
 function _setUserRequest (senderID, postbackOption) {
-
   let userName = ''
 
   User.findByIdAndUpdate(senderID,
     { $set: {
       status: postbackOption,
       timestamp: new Date().toISOString()
-    }},(err, data) => {
-
+    }}, (err, data) => {
       if (data == null || err != null) {
         graphApi.getUserDataByID(senderID).then((user) => {
           userName = user['first_name']
@@ -101,6 +99,7 @@ function _setUserRequest (senderID, postbackOption) {
           }
           User.create(userData)
         }).catch((err) => {
+          console.error(err)
           userName = ''
           User.create({
             _id: senderID,
@@ -110,7 +109,7 @@ function _setUserRequest (senderID, postbackOption) {
           })
         })
       } else {
-        userName = data.name;
+        userName = data.name
       }
 
       messagerApi.sendLocationReply(senderID, userName)
@@ -121,7 +120,7 @@ function _setUserRequest (senderID, postbackOption) {
 function _getStationsForUser (senderID, coords) {
   async.auto({
     getUserInfo: (cb) => {
-      User.findById(senderID , function (err, data) {
+      User.findById(senderID, (err, data) => {
         if (data == null || err != null) {
           cb(`Usuarion ${senderID} no encontrado`, null)
         } else {
@@ -192,7 +191,6 @@ function _getStationsForUser (senderID, coords) {
     }, function (error, numberAffected, rawResponse) {
       if (error) throw error
     })
-
   })
 }
 

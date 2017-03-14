@@ -9,7 +9,7 @@ var UserDev = function () {
     timestamp: Date
   })
 
-  mongoose.model('UserDev',  UserDevSchema)
+  mongoose.model('UserDev', UserDevSchema)
 }
 
 module.exports = UserDev

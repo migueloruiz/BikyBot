@@ -28,9 +28,9 @@ module.exports = {
   sendLocationReply: function (recipientId, name) {
     let qArray = [
       (name !== '' && name != null) ? `${name}, ¿Cuál es tu ubicación` : '¿Cuál es tu ubicación?',
-      (name !== '' && name != null) ? `${name}, ¿Cuál es tu ubicación` :'¿Dónde estás? 📍',
-      (name !== '' && name != null) ? `${name}, ¿Dónde estás? 📍` :'¿Por dónde estas?',
-      (name !== '' && name != null) ? `${name}, ¿Por dónde estas?` :'¿Me conpartes tu ubicación?'
+      (name !== '' && name != null) ? `${name}, ¿Cuál es tu ubicación` : '¿Dónde estás? 📍',
+      (name !== '' && name != null) ? `${name}, ¿Dónde estás? 📍` : '¿Por dónde estas?',
+      (name !== '' && name != null) ? `${name}, ¿Por dónde estas?` : '¿Me conpartes tu ubicación?'
     ]
     let text = qArray[ Math.floor(Math.random() * qArray.length) ]
 
@@ -116,7 +116,6 @@ module.exports = {
 // Request For API
 // =============================
 function _sendMessage (recipientId, message, action) {
-
   let messageData = {
     recipient: {
       id: recipientId
@@ -132,8 +131,9 @@ function _sendMessage (recipientId, message, action) {
     method: 'POST',
     json: messageData
   }, function (error, response, body) {
-    if (error || response.statusCode !== 200)
+    if (error || response.statusCode !== 200) {
       console.error('Failed calling Send API', response.statusCode, response.statusMessage, body.error)
+    }
   })
 }
 
@@ -148,7 +148,7 @@ function _createListElement (station, userLoc) {
     subtitle: `${availabilityText} - ${parseFloat(station.distance).toFixed(1)} km`,
     default_action: {
       type: 'web_url',
-      url: _getMapServiceUrl(userLoc, station) ,
+      url: _getMapServiceUrl(userLoc, station),
       messenger_extensions: true,
       webview_height_ratio: 'tall',
       fallback_url: _getMapServiceUrl(userLoc, station)
