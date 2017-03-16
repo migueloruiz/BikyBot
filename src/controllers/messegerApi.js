@@ -53,7 +53,7 @@ module.exports = {
               buttons: [
                 {
                   type: 'web_url',
-                  url: 'https://m.me/1085397894889504',
+                  url: 'https://m.me/' + process.env.FB_PAGE_ID,
                   title: 'Iniciar conversacion'
                 }
               ]
