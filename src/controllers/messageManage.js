@@ -109,7 +109,7 @@ function createUser(senderID, postbackOption, userName){
     status: postbackOption
   }, function (err, small) {
     if (err) {
-      console.error(err)
+      console.error('Error: BD',err)
       messagerApi.sendTextMessage(senderID, err)
     }
      messagerApi.sendLocationReply(senderID, userName)
