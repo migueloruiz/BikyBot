@@ -1,28 +1,28 @@
 html
-	head
-		title Messenger Demo
-	body
-		script.
-			window.fbAsyncInit = function() {
-				FB.init({
-					appId: !{atributes.messenger_app_id},
-					xfbml: true,
-					version: 'v2.6'
-					});
-					};
-					(function(d, s, id){
-						var js, fjs = d.getElementsByTagName(s)[0];
-						if (d.getElementById(id)) {return;}
-						js = d.createElement(s); js.id = id;
-						js.src = "//connect.facebook.net/en_US/sdk.js";
-						fjs.parentNode.insertBefore(js, fjs);
-						}(document, 'script', 'facebook-jssdk'));
-		h1 Messenger Bot: !{title}
-		div
-			p
-				| The &quot;Send to Messenger&quot; plugin will trigger an authentication callback to your webhook.
-				.fb-send-to-messenger( messenger_app_id= atributes.messenger_app_id, page_id= atributes.page_id, color='blue', size='standard', data-ref='PASS_THROUGH_PARAM' )
-		div
-			p
-				| The &quot;Message Us&quot; plugin takes the user directly to Messenger and into a thread with your Page.
-				.fb-messengermessageus( messenger_app_id= atributes.messenger_app_id, page_id= atributes.page_id, color='blue', size='standard' )
+  head
+    title Messenger Demo
+  body
+    script.
+      window.fbAsyncInit = function() {
+        FB.init({
+          appId: !{atributes.messenger_app_id},
+          xfbml: true,
+          version: 'v2.6'
+          });
+          };
+          (function(d, s, id){
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) {return;}
+            js = d.createElement(s); js.id = id;
+            js.src = "//connect.facebook.net/en_US/sdk.js";
+            fjs.parentNode.insertBefore(js, fjs);
+            }(document, 'script', 'facebook-jssdk'));
+    h1 Messenger Bot: !{title}
+    div
+      p
+        | The &quot;Send to Messenger&quot; plugin will trigger an authentication callback to your webhook.
+        .fb-send-to-messenger( messenger_app_id= atributes.messenger_app_id, page_id= atributes.page_id, color='blue', size='standard', data-ref='PASS_THROUGH_PARAM' )
+    div
+      p
+        | The &quot;Message Us&quot; plugin takes the user directly to Messenger and into a thread with your Page.
+        .fb-messengermessageus( messenger_app_id= atributes.messenger_app_id, page_id= atributes.page_id, color='blue', size='standar
