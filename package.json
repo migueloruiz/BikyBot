@@ -6,7 +6,7 @@
     "serve": "nodemon app.js"
   },
   "engines": {
-    "node": "6.8.0"
+    "node": "6.11.1"
   },
   "dependencies": {
     "async": "^2.1.4",
